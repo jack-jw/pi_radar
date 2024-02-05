@@ -20,8 +20,8 @@ def callsign(callsign):
     with open("callsigns.csv", 'r') as rawDatabase: # open database
         database = csv.reader(rawDatabase) # convert CSVs to 2D list
         for row in database: # linear search
-            if callsign in row[0]: # row[0] is ICAO callsign
-                return row[1]
+            if callsign in row[1]: # row[0] is ICAO callsign
+                return row[2]
 
 # Route lookup function
 def route(route):
