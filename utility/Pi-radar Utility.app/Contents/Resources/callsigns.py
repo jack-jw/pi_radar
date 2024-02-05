@@ -28,20 +28,19 @@ except ImportError:
         print(f"Failed to install beautifulsoup4: {e}")
         sys.exit(1)
 
-def extract_table_content(html_content):
-    match = re.search('<table[^>]*>(.*?)</table>', html_content, re.DOTALL)
+def extractTableContent(htmlContent):
+    match = re.search('<table[^>]*>(.*?)</table>', htmlContent, re.DOTALL)
     if match:
         return match.group(1)
 
-def html_to_csv(html_content, output_file):
-    table_content = extract_table_content(html_content)
+def htmlToCSV(htmlContent, outputFile):
+    tableContent = extractTableContent(htmlContent)
 
     # Parse HTML using BeautifulSoup
-    soup = BeautifulSoup(table_content, 'html.parser')
+    soup = BeautifulSoup(tableContent, 'html.parser')
 
-    # Process the table_content as needed
-    # For simplicity, let's write it to a CSV file
-    with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
+    # Process the tableContent
+    with open(outputFile, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
 
         # Find all table rows
@@ -56,17 +55,11 @@ def html_to_csv(html_content, output_file):
             # Write the row to the CSV file
             writer.writerow(columns)
 
-# Wikipedia link
-wikipedia_link = "https://en.wikipedia.org/wiki/List_of_airline_codes"
-
 # Fetch the HTML content from the Wikipedia link
-response = requests.get(wikipedia_link)
-html_content = response.text
-
-# Define the output CSV file
-output_csv_file = "/tmp/callsigns.csv"
+response = requests.get("https://en.wikipedia.org/wiki/List_of_airline_codes")
+htmlContent = response.text
 
 # Convert HTML to CSV
-html_to_csv(html_content, output_csv_file)
+htmlToCSV(response.text, "/tmp/callsigns.csv")
 
-print(f"Conversion complete. CSV file saved at {output_csv_file}")
+print("Table successfully scraped and saved to /tmp/callsigns.csv.")

@@ -36,9 +36,9 @@ if response.status_code == 200:
     # Find all tables on the page
     tables = soup.find_all('table')
 
-    # Check if there is a third table (flight numbers table)
+    # Check if the flight numbers table exists
     if len(tables) >= 3:
-        table = tables[2]  # Select the third table (index 2)
+        table = tables[2]  # Select the third table
         
         # Extract data from the table
         rows = table.find_all('tr')
@@ -47,18 +47,12 @@ if response.status_code == 200:
         with open('/tmp/routesBAW.csv', 'w', newline='', encoding='utf-8') as csvfile:
             csvwriter = csv.writer(csvfile)
 
-            # Write the header row if the table has one
-            header_row = rows[0].find_all('th')
-            if header_row:
-                header = [header.text.strip() for header in header_row]
-                csvwriter.writerow(header)
-
-            # Write the data rows
+            # Write the rows
             for row in rows[1:]:
                 data = [cell.text.strip() for cell in row.find_all('td')]
                 csvwriter.writerow(data)
 
-        print("Data successfully scraped and saved to /tmp/routesBAW.csv.")
+        print("Table successfully scraped and saved to /tmp/routesBAW.csv.")
     else:
         print("The flight numbers table was not found.")
 else:
