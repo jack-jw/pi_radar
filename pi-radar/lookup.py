@@ -47,3 +47,21 @@ def route(route):
 
 # Define headers
 airframeHeaders = ['ICAO24', 'Registration', 'Manufacturer ICAO', 'Manufacturer name', 'Model', 'Type code', 'Serial number', 'Line number', 'ICAO type', 'Operator', 'Operator callsign', 'Operator ICAO', 'Operator IATA', 'Owner', 'Test registration', 'Registered', 'Registered until', 'Status', 'Built', 'First flight', 'Seat configuration', 'Engines', 'Modes', 'ADSB', 'ACARS', 'Notes', 'Category description']
+
+# give interface if script is being run directly
+if __name__ == "__main__":
+    menu = input("Search for a callsign, a route, or an airframe from an address? [c/r/a] ")
+    if menu == "c":
+        print(callsign(input("Callsign: ")))
+    elif menu == "r":
+        print(route(input("Route: ")))
+    elif menu == "a":
+        details = address(input("ICAO24 address: "))
+        if details != None:
+            for index in range(1,27):
+                if details[index] != "":
+                    print(airframeHeaders[index],"-",details[index])
+        else:
+            print(details)
+    else:
+        print("Invalid option")
