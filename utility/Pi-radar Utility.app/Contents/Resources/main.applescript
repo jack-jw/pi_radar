@@ -59,9 +59,9 @@ else if mainMenuReturn is "Manage Databases" then
 					set progress completed steps to 4
 					
 					set progress additional description to "Transferring files..."
-					do shell script "mkdir /Volumes/PIRADAR/.pi-radar; mv /tmp/callsigns.csv /Volumes/PIRADAR/.pi-radar/callsigns.csv; mv /tmp/routesBAW.csv /Volumes/PIRADAR/.pi-radar/routesBAW.csv; mv /tmp/airframes.csv /Volumes/PIRADAR/.pi-radar/airframes.csv;"
+					do shell script "mkdir /Volumes/PIRADAR/.pi-radar; mv /tmp/callsigns.csv /Volumes/PIRADAR/.pi-radar/; mv /tmp/routes*.csv /Volumes/PIRADAR/.pi-radar/; mv /tmp/airframes.csv /Volumes/PIRADAR/.pi-radar/"
 					
-					do shell script "echo 'Please insert this USB in to the Raspberry Pi running Pi-radar. This file will be deleted once the databases have been successfully transferred.' > /Volumes/PIRADAR/README.txt"
+					do shell script "echo 'Please insert this USB in to the Raspberry Pi running Pi-radar. This file will be deleted once the databases have been successfully transferred.' > /Volumes/PIRADAR/README"
 					set progress completed steps to 5
 					
 					set progress additional description to "Unmounting disk"
@@ -85,20 +85,22 @@ else if mainMenuReturn is "Manage Databases" then
 		end if -- end if disk exists
 		
 	else if dbMenuReturn is "Load Custom Routes" then
-		display alert "Load Custom Routes" message "Please view the instructions before continuing to load a custom route database for an airline" buttons {"View Instructions", "Continue"}
-		if the button returned of the result is "Continue" then
+		display alert "Load Custom Routes" buttons {"Download Template", "Load CSV"}
+		if the button returned of the result is "Load CSV" then
+		
 			set customRoutes to choose file with prompt "Select the custom airline route database you would like to load" of type "csv"
-			do shell script "cp " & quoted form of (POSIX path of customRoutes) & " /tmp/routesCUSTOM.csv"
+			
 			set callsign to the text returned of (display dialog "Enter the three-digit callsign of the airline" default answer "" with icon note buttons "Continue" default button 1)
+			
 			if callsign is "BAW" then
-				display dialog
+				display alert "Callsign Error" message "The British Airways routes database is built in to Pi-radar."
 			else
-				do shell script "mv /tmp/routesCUSTOM.csv /tmp/routes" & callsign & ".csv"
+				do shell script "cp " & quoted form of (POSIX path of customRoutes) & " /tmp/routes" & callsign & ".csv"
+				display alert "Route Database Loaded" message "Your route database has been loaded. Please now update the databases to transfer it to your Raspberry Pi."
 			end if
 			
 		else
-			set instructionsPath to POSIX path of (path to resource "Creating custom route databases.pdf" in bundle (path to application "Pi-radar Utility")) as string
-			open instructionsPath
+			open location "https://github.com/yellowcress/pi-radar/raw/main/utility/Custom%20route%20database%20template.numbers"
 			
 		end if
 		
