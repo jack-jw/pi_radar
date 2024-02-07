@@ -3,14 +3,21 @@
 import csv
 import os
 
-# ICAO24 lookup function
+# Define airframe headers
+airframeHeaders = ['ICAO24', 'Registration', 'Manufacturer ICAO', 'Manufacturer name', 'Model', 'Type code', 'Serial number', 'Line number', 'ICAO type', 'Operator', 'Operator callsign', 'Operator ICAO', 'Operator IATA', 'Owner', 'Test registration', 'Registered', 'Registered until', 'Status', 'Built', 'First flight', 'Seat configuration', 'Engines', 'Modes', 'ADSB', 'ACARS', 'Notes', 'Category description']
+
+# ICAO24 address lookup function
 def address(address):
     address = address.lower()
     with open("airframes.csv", 'r') as rawDatabase: # open database
         database = csv.reader(rawDatabase) # convert CSVs to 2D list
         for row in database: # linear search
             if address in row[0]: # row[0] is ICAO24 address
-                return row # return the row if the address matches
+                details = {}
+                for index in range(27):
+                    if row[index] != "":
+                        details[airframeHeaders[index]] = row[index]
+                return details # return the row if the address matches
 
 # Callsign lookup function
 def callsign(callsign):
@@ -45,9 +52,6 @@ def route(route):
                     if route in item:
                         return row[3]
 
-# Define headers
-airframeHeaders = ['ICAO24', 'Registration', 'Manufacturer ICAO', 'Manufacturer name', 'Model', 'Type code', 'Serial number', 'Line number', 'ICAO type', 'Operator', 'Operator callsign', 'Operator ICAO', 'Operator IATA', 'Owner', 'Test registration', 'Registered', 'Registered until', 'Status', 'Built', 'First flight', 'Seat configuration', 'Engines', 'Modes', 'ADSB', 'ACARS', 'Notes', 'Category description']
-
 # give interface if script is being run directly
 if __name__ == "__main__":
     menu = input("Search for a callsign, a route, or an airframe from an address? [c/r/a] ")
@@ -58,9 +62,8 @@ if __name__ == "__main__":
     elif menu == "a":
         details = address(input("ICAO24 address: "))
         if details != None:
-            for index in range(1,27):
-                if details[index] != "":
-                    print(airframeHeaders[index],"-",details[index])
+            for header, value in details.items():
+                print(f"{header}: {value}")
         else:
             print(details)
     else:
