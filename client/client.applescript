@@ -1,12 +1,12 @@
 -- Pi-radar Utility
 
 -- Main menu
-set mainMenuReturn to the button returned of (display alert "Pi-radar Utility" buttons {"Quit", "Manage Databases", "Flash to SD Card"} default button 3)
+set mainMenuReturn to the button returned of (display alert "Pi-radar" buttons {"Quit", "Manage Databases", "Flash to SD Card"} default button 3)
 if mainMenuReturn is "Flash to SD Card" then
 	display alert "Not implemented"
 	
 else if mainMenuReturn is "Manage Databases" then
-	set dbMenuReturn to the button returned of (display alert "Manage Databases" buttons {"Load Custom Routes", "Update Databases"} default button 2)
+	set dbMenuReturn to the button returned of (display alert "Manage Databases" buttons {"Download Custom Routes Template", "Load Custom Routes CSV", "Update Databases"} default button 3)
 	
 	if dbMenuReturn is "Update Databases" then
 		display alert "Update Databases" message "Ensure your USB disk is connected to this computer and is visible in Finder, and that you are connected to the Internet." buttons "Continue"
@@ -41,12 +41,12 @@ else if mainMenuReturn is "Manage Databases" then
 					set progress completed steps to 0
 					
 					set progress additional description to "Downloading callsigns database..."
-					set callsignFetcherPath to POSIX path of (path to resource "callsigns.py" in bundle (path to application "Pi-radar Utility")) as string
+					set callsignFetcherPath to POSIX path of (path to resource "callsigns.py" in bundle (path to application "Pi-radar")) as string
 					do shell script "python3 '" & callsignFetcherPath & "'"
 					set progress completed steps to 1
 					
 					set progress additional description to "Downloading British Airways route database..."
-					set routesBAWPath to POSIX path of (path to resource "routesBAW.py" in bundle (path to application "Pi-radar Utility")) as string
+					set routesBAWPath to POSIX path of (path to resource "routesBAW.py" in bundle (path to application "Pi-radar")) as string
 					do shell script "python3 '" & routesBAWPath & "'"
 					set progress completed steps to 2
 					
@@ -84,25 +84,21 @@ else if mainMenuReturn is "Manage Databases" then
 			
 		end if -- end if disk exists
 		
-	else if dbMenuReturn is "Load Custom Routes" then
-		display alert "Load Custom Routes" buttons {"Download Template", "Load CSV"}
-		if the button returned of the result is "Load CSV" then
+	else if dbMenuReturn is "Load Custom Routes CSV" then
 		
-			set customRoutes to choose file with prompt "Select the custom airline route database you would like to load" of type "csv"
-			
-			set callsign to the text returned of (display dialog "Enter the three-digit callsign of the airline" default answer "" with icon note buttons "Continue" default button 1)
-			
-			if callsign is "BAW" then
-				display alert "Callsign Error" message "The British Airways routes database is built in to Pi-radar."
-			else
-				do shell script "cp " & quoted form of (POSIX path of customRoutes) & " /tmp/routes" & callsign & ".csv"
-				display alert "Route Database Loaded" message "Your route database has been loaded. Please now update the databases to transfer it to your Raspberry Pi."
-			end if
-			
+		set customRoutes to choose file with prompt "Select the custom airline route database you would like to load" of type "csv"
+		
+		set callsign to the text returned of (display dialog "Enter the three-digit callsign of the airline" default answer "" with icon note buttons "Continue" default button 1)
+		
+		if callsign is "BAW" then
+			display alert "Callsign Error" message "The British Airways routes database is built in to Pi-radar."
 		else
-			open location "https://github.com/yellowcress/pi-radar/raw/main/utility/Custom%20route%20database%20template.numbers"
-			
+			do shell script "cp " & quoted form of (POSIX path of customRoutes) & " /tmp/routes" & callsign & ".csv"
+			display alert "Route Database Loaded" message "Your route database has been loaded. Please now update the databases to transfer it to your Raspberry Pi."
 		end if
+		
+	else if dbMenuReturn is "Download Custom Routes Template" then
+		open location "https://github.com/yellowcress/pi-radar/raw/main/client/Custom%20route%20database%20template.numbers"
 		
 		
 	end if -- end if dbMenu
