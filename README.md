@@ -1,5 +1,5 @@
 ## Pi-radar
-work in progress does not work yet!!
+very much a work in progress is not functional yet!!
 ### Credits
 #### Data sources
 * [airframes.csv](./airframes.csv) from [opensky-network.org](https://opensky-network.org/datasets/metadata/aircraftDatabase.csv)
