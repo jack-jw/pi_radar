@@ -6,9 +6,15 @@ response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
 if [[ "$response" =~ ^(yes|y)$ ]]; then
 	echo "Running sudo -v (may require password)"
 	sudo -v
-	cd /opt/
+	cd /var/lib/
 	echo "Cloning github.com/yellowcress/pi-radar..."
     sudo git clone https://github.com/yellowcress/pi-radar.git
+    
+    echo "Installing dependencies"
+    sudo apt install -y python3-requests
+    sudo apt install -y python3-bs4
+    sudo apt install -y python3-pandas
+    
     
     # add dump1090, gfx-hat config etc here
     
