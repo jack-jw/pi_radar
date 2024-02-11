@@ -15,6 +15,33 @@ def airframe(address):
 	pairs = zip(airframeHeaders[:len(filteredAirframeInfo)], filteredAirframeInfo)
 	result = {key: value for key, value in pairs}
 	return result
+	
+def airportICAO(iata):
+	iata = iata.upper()
+	mainDB = sqlite3.connect('main.db')
+	cursor = mainDB.cursor()
+	cursor.execute(f"SELECT gps_code FROM airports WHERE iata_code = '{iata}'")
+	result = cursor.fetchone()
+	cursor.close()
+	mainDB.close()
+	result = result[0]
+	return result
+
+def airportName(code):
+	mainDB = sqlite3.connect('main.db')
+	cursor = mainDB.cursor()
+	
+	if len(code) == 4:
+		cursor.execute(f"SELECT name FROM airports WHERE gps_code = '{code}'")
+		result = cursor.fetchone()
+	elif len(code) == 3:
+		cursor.execute(f"SELECT name FROM airports WHERE iata_code = '{code}'")
+		result = cursor.fetchone()
+	else:
+		result = None
+	
+	result = result[0]
+	return result
 
 def callsign(callsign):
 	callsign = callsign.upper()
@@ -71,6 +98,10 @@ def fetchDBs():
 
 	response = requests.get("https://opensky-network.org/datasets/metadata/aircraftDatabase.csv")
 	with open('airframes.csv', 'w', newline='', encoding='utf-8') as csvFile:
+	    csvFile.write(response.text)
+	
+	response = requests.get("https://davidmegginson.github.io/ourairports-data/airports.csv")
+	with open('airports.csv', 'w', newline='', encoding='utf-8') as csvFile:
 	    csvFile.write(response.text)
 	
 	response = requests.get("https://speedbird.online/flightnumbers.php")
