@@ -63,8 +63,7 @@ def route(route):
 	cursor = mainDB.cursor()
 	cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name = '{routesTable}'")
 	if (cursor.fetchone() is not None) and callsign != "BAW":
-		print("\nA\n")
-		cursor.execute(f"SELECT Route FROM " + routesTable + " WHERE Callsign = '{route}'")
+		cursor.execute(f"SELECT Route FROM {routesTable} WHERE Callsign = '{route}'")
 	else:
 		cursor.execute(f"SELECT `1000-1299(Other)` FROM routesBAW WHERE `1301-1499(Domestic)` LIKE '%{route}%'")
 	result = cursor.fetchone()
@@ -89,7 +88,7 @@ def convertDBs():
 	mainDB.commit()
 	mainDB.close()
 	
-def fetchDBs():
+def updateDBs():
 	import csv
 	import re
 	import sys

@@ -14,6 +14,6 @@ elif menu == "a":
 		for header, value in details.items():
 			print(f"{header}: {value}")
 	else:
-		print(lookup.details)
+		print(None)
 else:
 	print("Invalid option")
