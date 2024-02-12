@@ -9,17 +9,16 @@ if [[ "$response" =~ ^(yes|y)$ ]]; then
 	cd /var/lib/
 	echo "Cloning github.com/yellowcress/pi-radar..."
     sudo git clone https://github.com/yellowcress/pi-radar.git
+    cd /var/lib/pi-radar
+    sudo rm /.git
     
     echo "Installing dependencies"
-    sudo apt install -y python3-requests
-    sudo apt install -y python3-bs4
-    sudo apt install -y python3-pandas
+    sudo apt install -y python3-requests python3-bs4 python3-pandas
     
-    
-    # add dump1090, gfx-hat config etc here
+    # more here
     
     echo "Adding and enabling service..."
-    sudo cp /opt/pi-radar/pi-radar.service /etc/systemd/system/
+    sudo cp /var/lib/pi-radar/pi-radar.service /etc/systemd/system/
     sudo systemctl enable pi-radar.service
     echo "Starting pi-radar..."
     sudo systemctl start pi-radar.service
