@@ -1,7 +1,8 @@
 ## Pi-radar
-very much a work in progress is not functional yet!!
+very much a work in progress is not functional yet at all!!
 ### Credits
 #### Data sources
-* [airframes.csv](./airframes.csv) from [opensky-network.org](https://opensky-network.org/datasets/metadata/aircraftDatabase.csv)
-* [callsigns.csv](./callsigns.csv) scraped using [callsigns.py](./utility/Pi-radar%20Utility.app/Contents/Resources/callsigns.py) from [wikipedia.org](https://en.wikipedia.org/wiki/List_of_airline_codes)
-* [routesBAW.csv](./routesBAW.csv) scraped using [routesBAW.py](./utility/Pi-radar%20Utility.app/Contents/Resources/routesBAW.py) from [speedbird.online](https://speedbird.online/flightnumbers.php)
+* airframes table in [main.db](./main.db) from [opensky-network.org](https://opensky-network.org/datasets/metadata/aircraftDatabase.csv)
+* airports table in [main.db](./main.db) from [ourairports.com](https://ourairports.com/data/)
+* routesBAW table in [main.db](./main.db) scraped using [updateDBs()](./utils.py#L91) from [speedbird.online](https://speedbird.online/flightnumbers.php)
+* callsigns table in [main.db](./main.db) scraped using [updateDBs()](./utils.py#L91) from [wikipedia.org](https://en.wikipedia.org/wiki/List_of_airline_codes)
