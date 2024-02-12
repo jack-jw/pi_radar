@@ -7,10 +7,9 @@ end flashSD
 on flashUSB()
 	try
 		set loaded to do shell script "ls /tmp/routes*.csv"
-		set loaded to do shell script "echo " & quoted form of loaded & " | sed 's/.csv//g' "
-		set loaded to do shell script "echo " & quoted form of loaded & " | sed 's/\\/tmp\\/routes//g' "
+		set loaded to do shell script "echo " & quoted form of loaded & " | sed 's/.csv//g' | sed 's/\\/tmp\\/routes//g'"
 	on error
-		display alert "No Route Databases Loaded" message "You must load at least one route database before flashing them to a USB disk."
+		display alert "No Route Databases Loaded" message "You must load at least one route database before flashing to a USB disk."
 		return
 	end try
 	display alert "Update Databases" message "Loaded route databases: " & return & loaded & return & return & "Ensure your USB disk is connected to this computer and is visible in Finder, and that you are connected to the Internet." buttons "Continue"
@@ -38,25 +37,24 @@ on flashUSB()
 		if diskFS is "MS-DOS" then
 			set progress description to "Flashing to " & selectedDisk
 			set progress additional description to "Formatting USB disk..."
-			set progress total steps to 4
-			set progress completed steps to 1
+			set progress total steps to 3
 			
-			set progress completed steps to 2
+			set progress completed steps to 1
 			do shell script "diskutil eraseDisk FAT32 PI-RADAR MBRFormat /dev/" & diskParent
 			
+			set progress completed steps to 2
 			do shell script "mkdir /Volumes/PI-RADAR/.pi-radar; mv /tmp/routes*.csv /Volumes/PI-RADAR/.pi-radar/"
-			set progress additional description to "Transferring your databases..."
+			set progress additional description to "Transferring loaded databases..."
 			do shell script "echo 'Please insert this USB in to the Raspberry Pi running Pi-radar. This file will be deleted once your databases have been successfully transferred.' > /Volumes/PI-RADAR/README"
-			set progress completed steps to 3
 			
+			set progress completed steps to 3
 			do shell script "diskutil eject /Volumes/PI-RADAR"
 			set progress additional description to "Unmounting disk..."
-			set progress completed steps to 4
 			
 			set progress additional description to "Done"
 			delay 1
 			
-			display alert "USB disk formatted with your databases" message "You may now safely remove the USB disk from your Mac and insert it in to the Raspberry Pi running Pi-radar." buttons "OK"
+			display alert "Operation Complete" message "You may now safely remove the USB disk from your Mac and insert it in to the Raspberry Pi running Pi-radar."
 			
 		else
 			display alert "Incorrect Format" message (selectedDisk & " is formatted as " & diskFS & ". Please format it as MS-DOS (FAT) using Disk Utility to use it here.") buttons {"Quit", "Use Another Disk", "Open Disk Utility"} default button 2
@@ -76,7 +74,6 @@ on loadCustomRoutes()
 		try
 			set callsign to the text returned of (display dialog "Enter the three-digit callsign of the airline" default answer "" with icon note buttons "Continue" default button 1)
 			set callsign to do shell script "echo " & quoted form of callsign & " | tr '[:lower:]' '[:upper:]'"
-			set maxLength to 20
 			set callsign to text 1 thru 3 of callsign
 			exit repeat
 		on error
@@ -100,7 +97,7 @@ if mainMenuReturn is "Flash to SD Card" then
 	flashSD()
 	
 else if mainMenuReturn is "Add Route Databases" then
-	set dbMenuReturn to the button returned of (display alert "Route Databases" message "Add route databases for any airline to see route information in Pi-radar." buttons {"Download Custom Routes Template", "Load Custom Routes", "Flash to USB Disk"} default button 3)
+	set dbMenuReturn to the button returned of (display alert "Route Databases" message "Add route databases for any airline to see route information within Pi-radar." buttons {"Download Custom Routes Template", "Load Custom Routes", "Flash to USB Disk"} default button 3)
 	
 	if dbMenuReturn is "Flash to USB Disk" then
 		flashUSB()
