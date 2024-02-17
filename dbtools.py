@@ -2,9 +2,9 @@ import sqlite3
 
 database = 'main.db'
 
-airframeHeaders = ('ICAO24', 'Registration', 'Manufacturer ICAO', 'Manufacturer name', 'Model', 'Type code', 'Serial number', 'Line number', 'ICAO type', 'Operator', 'Operator callsign', 'Operator ICAO', 'Operator IATA', 'Owner', 'Test registration', 'Registered', 'Registered until', 'Status', 'Built', 'First flight', 'Seat configuration', 'Engines', 'Modes', 'ADSB', 'ACARS', 'Notes', 'Category description')
+airframeHeaders = ('ICAO24 address', 'Registration', 'Manufacturer ICAO name', 'Manufacturer name', 'Model', 'Type code', 'Serial number', 'Line number', 'ICAO type', 'Operator', 'Operator callsign', 'Operator ICAO code', 'Operator IATA code', 'Owner', 'Test registration', 'Registered', 'Registered until', 'Status', 'Built', 'First flight', 'Seat configuration', 'Engines', 'Modes', 'ADSB', 'ACARS', 'Notes', 'Category description')
 
-airportHeaders = ('ID', 'Ident', 'Type', 'Name', 'Latitude', 'Longitude', 'Elevation', 'Continent', 'Country', 'Reigon', 'Municipality', 'Scheduled service', 'ICAO code', 'IATA code', 'Local code', 'Homepage', 'Wikipedia', 'Keywords')
+airportHeaders = ('ID', 'Identification', 'Type', 'Name', 'Latitude', 'Longitude', 'Elevation', 'Continent', 'Country', 'Reigon', 'Municipality', 'Scheduled service', 'ICAO code', 'IATA code', 'Local code', 'Homepage', 'Wikipedia', 'Keywords')
 
 def link(headers, dataset):
 	result = {}
