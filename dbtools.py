@@ -1,10 +1,18 @@
 import sqlite3
 
-database = "main.db"
+database = 'main.db'
 
 airframeHeaders = ('ICAO24', 'Registration', 'Manufacturer ICAO', 'Manufacturer name', 'Model', 'Type code', 'Serial number', 'Line number', 'ICAO type', 'Operator', 'Operator callsign', 'Operator ICAO', 'Operator IATA', 'Owner', 'Test registration', 'Registered', 'Registered until', 'Status', 'Built', 'First flight', 'Seat configuration', 'Engines', 'Modes', 'ADSB', 'ACARS', 'Notes', 'Category description')
 
-airportHeaders = ('ID', 'Ident', 'Name', 'Latitude', 'Longitude', 'Elevation', 'Continent', 'Country', 'Reigon', 'Municipality', 'Scheduled service', 'ICAO code', 'IATA code', 'Local code', 'Homepage', 'Wikipedia', 'Keywords')
+airportHeaders = ('ID', 'Ident', 'Type', 'Name', 'Latitude', 'Longitude', 'Elevation', 'Continent', 'Country', 'Reigon', 'Municipality', 'Scheduled service', 'ICAO code', 'IATA code', 'Local code', 'Homepage', 'Wikipedia', 'Keywords')
+
+def link(headers, dataset):
+	result = {}
+	headersRange = range(len(headers) - 1)
+	for row in headersRange:
+		if dataset[row] is not None:
+			result[headers[row]] = dataset[row]
+	return result
 
 def airframe(address):
 	address = address.lower()
@@ -15,20 +23,21 @@ def airframe(address):
 	cursor.close()
 	mainDB.close()
 	
-	# SORT DICTIONARY
+	result = link(airframeHeaders, airframeInfo)
+	
 	return result
 
 def airport(iata):
 	iata = iata.upper()
 	mainDB = sqlite3.connect(database)
 	cursor = mainDB.cursor()
-	
 	cursor.execute(f"SELECT * FROM airports WHERE iata_code = '{iata}'")
 	airportInfo = cursor.fetchone()
 	cursor.close()
 	mainDB.close()
 	
-	# SORT DICTIONARY
+	result = link(airportHeaders, airportInfo)
+	
 	return result
 
 def airline(callsign):
@@ -36,7 +45,7 @@ def airline(callsign):
 	code = callsign[:3]
 	mainDB = sqlite3.connect(database)
 	cursor = mainDB.cursor()
-	cursor.execute(f"SELECT Airline FROM callsigns WHERE ICAO = '{code}'")
+	cursor.execute(f"SELECT Airline FROM codes WHERE ICAO = '{code}'")
 	result = cursor.fetchone()
 	cursor.close()
 	mainDB.close()
@@ -46,7 +55,7 @@ def airline(callsign):
 def route(callsign):
 	callsign = callsign.upper()
 	code = callsign[:3]
-	routesTable = "routes" + code
+	routesTable = 'routes' + code
 	
 	mainDB = sqlite3.connect(database)
 	cursor = mainDB.cursor()
@@ -63,16 +72,16 @@ def route(callsign):
 	result = result[0]
 	return result
 	
-def convertDBs():
+def convertDBs(database):
 	from pandas import read_csv
 	import glob
 	import os
 	mainDB = sqlite3.connect(database)
 	
-	csvs = glob.glob("*.csv")
+	csvs = glob.glob('*.csv')
 	for database in csvs:
 		db = read_csv(database)
-		tableName = database.replace(".csv","")
+		tableName = database.replace('.csv','')
 		db.to_sql(tableName, mainDB, index=False, if_exists='replace')
 		mainDB.commit()
 		os.remove(database)
@@ -85,13 +94,17 @@ def convertDBs():
 	except:
 		pass
 	
-	cursor.execute('''
-	CREATE TABLE routesBAW AS
-	SELECT "1301-1499(Domestic)" AS Callsign,  "1000-1299(Other)" AS Route
-	FROM routesBAWRaw''')
-	mainDB.commit()
-	cursor.execute('DROP TABLE routesBAWRaw')
-	mainDB.commit()
+	try:
+		cursor.execute('''
+		CREATE TABLE routesBAW AS
+		SELECT "1301-1499(Domestic)" AS Callsign,  "1000-1299(Other)" AS Route
+		FROM routesBAWRaw''')
+		mainDB.commit()
+		cursor.execute('DROP TABLE routesBAWRaw')
+		mainDB.commit()
+	except:
+		pass
+		
 	cursor.close()
 	mainDB.close()
 	
@@ -102,15 +115,15 @@ def updateDBs():
 	import requests
 	from bs4 import BeautifulSoup
 
-	response = requests.get("https://opensky-network.org/datasets/metadata/aircraftDatabase.csv")
+	response = requests.get('https://opensky-network.org/datasets/metadata/aircraftDatabase.csv')
 	with open('airframes.csv', 'w', newline='', encoding='utf-8') as csvFile:
 	    csvFile.write(response.text)
 	
-	response = requests.get("https://davidmegginson.github.io/ourairports-data/airports.csv")
+	response = requests.get('https://davidmegginson.github.io/ourairports-data/airports.csv')
 	with open('airports.csv', 'w', newline='', encoding='utf-8') as csvFile:
 	    csvFile.write(response.text)
 	
-	response = requests.get("https://en.wikipedia.org/wiki/List_of_airline_codes")
+	response = requests.get('https://en.wikipedia.org/wiki/List_of_airline_codes')
 	match = re.search('<table[^>]*>(.*?)</table>', response.text, re.DOTALL)
 	if match:
 		tableContent = match.group(1)
@@ -123,7 +136,7 @@ def updateDBs():
 			data = [cell.get_text(strip=True) for cell in cells]
 			csvWriter.writerow(data)
 			
-	response = requests.get("https://speedbird.online/flightnumbers.php")
+	response = requests.get('https://speedbird.online/flightnumbers.php')
 	soup = BeautifulSoup(response.text, 'html.parser')
 	tables = soup.find_all('table')
 	if len(tables) >= 3:
@@ -135,4 +148,4 @@ def updateDBs():
 				data = [cell.text.strip() for cell in row.find_all('td')]
 				csvWriter.writerow(data)
 	        
-	convertDBs()
+	convertDBs(database)
