@@ -1,7 +1,10 @@
 import sqlite3
 
 database = "main.db"
+
 airframeHeaders = ('ICAO24', 'Registration', 'Manufacturer ICAO', 'Manufacturer name', 'Model', 'Type code', 'Serial number', 'Line number', 'ICAO type', 'Operator', 'Operator callsign', 'Operator ICAO', 'Operator IATA', 'Owner', 'Test registration', 'Registered', 'Registered until', 'Status', 'Built', 'First flight', 'Seat configuration', 'Engines', 'Modes', 'ADSB', 'ACARS', 'Notes', 'Category description')
+
+airportHeaders = ('ID', 'Ident', 'Name', 'Latitude', 'Longitude', 'Elevation', 'Continent', 'Country', 'Reigon', 'Municipality', 'Scheduled service', 'ICAO code', 'IATA code', 'Local code', 'Homepage', 'Wikipedia', 'Keywords')
 
 def airframe(address):
 	address = address.lower()
@@ -12,36 +15,20 @@ def airframe(address):
 	cursor.close()
 	mainDB.close()
 	
-	filteredAirframeInfo = tuple(value for value in airframeInfo if value is not None)
-	pairs = zip(airframeHeaders[:len(filteredAirframeInfo)], filteredAirframeInfo)
-	result = {key: value for key, value in pairs}
+	# SORT DICTIONARY
 	return result
-	
-def airportICAO(iata):
+
+def airport(iata):
 	iata = iata.upper()
 	mainDB = sqlite3.connect(database)
 	cursor = mainDB.cursor()
-	cursor.execute(f"SELECT gps_code FROM airports WHERE iata_code = '{iata}'")
-	result = cursor.fetchone()
+	
+	cursor.execute(f"SELECT * FROM airports WHERE iata_code = '{iata}'")
+	airportInfo = cursor.fetchone()
 	cursor.close()
 	mainDB.close()
-	result = result[0]
-	return result
-
-def airportName(code):
-	mainDB = sqlite3.connect(database)
-	cursor = mainDB.cursor()
 	
-	if len(code) == 4:
-		cursor.execute(f"SELECT name FROM airports WHERE gps_code = '{code}'")
-		result = cursor.fetchone()
-	elif len(code) == 3:
-		cursor.execute(f"SELECT name FROM airports WHERE iata_code = '{code}'")
-		result = cursor.fetchone()
-	else:
-		result = None
-	
-	result = result[0]
+	# SORT DICTIONARY
 	return result
 
 def airline(callsign):
@@ -105,6 +92,7 @@ def convertDBs():
 	mainDB.commit()
 	cursor.execute('DROP TABLE routesBAWRaw')
 	mainDB.commit()
+	cursor.close()
 	mainDB.close()
 	
 def updateDBs():
