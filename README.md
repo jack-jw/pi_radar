@@ -1,4 +1,4 @@
-## Pi-radar
+## piradar
 very much a work in progress is not functional yet at all!!
 
 ### Data sources
