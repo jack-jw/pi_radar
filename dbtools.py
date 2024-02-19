@@ -2,10 +2,6 @@ import sqlite3
 
 database = 'main.db'
 
-airframeHeaders = ('ICAO24 address', 'Registration', 'Manufacturer ICAO name', 'Manufacturer name', 'Model', 'Type code', 'Serial number', 'Line number', 'ICAO type', 'Operator', 'Operator callsign', 'Operator ICAO code', 'Operator IATA code', 'Owner', 'Test registration', 'Registered', 'Registered until', 'Status', 'Built', 'First flight', 'Seat configuration', 'Engines', 'Modes', 'ADSB', 'ACARS', 'Notes', 'Category description')
-
-airportHeaders = ('ID', 'Identification', 'Type', 'Name', 'Latitude', 'Longitude', 'Elevation', 'Continent', 'Country', 'Reigon', 'Municipality', 'Scheduled service', 'ICAO code', 'IATA code', 'Local code', 'Homepage', 'Wikipedia', 'Keywords')
-
 def link(headers, dataset):
 	result = {}
 	headersRange = range(len(headers) - 1)
@@ -23,6 +19,8 @@ def airframe(address):
 	cursor.close()
 	mainDB.close()
 	
+	airframeHeaders = ('ICAO24 address', 'Registration', 'Manufacturer ICAO name', 'Manufacturer name', 'Model', 'Type code', 'Serial number', 'Line number', 'ICAO type', 'Operator', 'Operator callsign', 'Operator ICAO code', 'Operator IATA code', 'Owner', 'Test registration', 'Registered', 'Registered until', 'Status', 'Built', 'First flight', 'Seat configuration', 'Engines', 'Modes', 'ADSB', 'ACARS', 'Notes', 'Category description')
+	
 	result = link(airframeHeaders, airframeInfo)
 	
 	return result
@@ -35,6 +33,8 @@ def airport(iata):
 	airportInfo = cursor.fetchone()
 	cursor.close()
 	mainDB.close()
+	
+	airportHeaders = ('ID', 'Identification', 'Type', 'Name', 'Latitude', 'Longitude', 'Elevation', 'Continent', 'Country', 'Reigon', 'Municipality', 'Scheduled service', 'ICAO code', 'IATA code', 'Local code', 'Homepage', 'Wikipedia', 'Keywords')
 	
 	result = link(airportHeaders, airportInfo)
 	
