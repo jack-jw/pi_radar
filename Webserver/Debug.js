@@ -28,14 +28,14 @@ function bearing(point1, point2) {
 
 function fly(aircraft, heading, speed) {
     setHeading(aircraft, heading)
-	let speedMps = speed * 0.514444;
-	let distance = speedMps * 0.01;
-	let headingRad = heading * Math.PI / 180;
-	setInterval(function() {
-    	var latLng = aircraft.getLatLng();
-    	var newLat = latLng.lat + (Math.cos(headingRad) * (distance / 111111));
-    	var newLng = latLng.lng + (Math.sin(headingRad) * (distance / (111111 * Math.cos(latLng.lat * Math.PI / 180))));
-    	aircraft.setLatLng([newLat, newLng]);
+    let speedMps = speed * 0.514444;
+    let distance = speedMps * 0.01;
+    let headingRad = heading * Math.PI / 180;
+    setInterval(function() {
+        var latLng = aircraft.getLatLng();
+        var newLat = latLng.lat + (Math.cos(headingRad) * (distance / 111111));
+        var newLng = latLng.lng + (Math.sin(headingRad) * (distance / (111111 * Math.cos(latLng.lat * Math.PI / 180))));
+        aircraft.setLatLng([newLat, newLng]);
     }, 10);
 }
 

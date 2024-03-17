@@ -35,22 +35,22 @@
 }
 
 .aircraft-icon {
-	font-size: 24px;
-	color: white;
-	text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
-	transform-origin: center;
-	cursor: pointer;
-	transition: color 0.1s ease;
+    font-size: 24px;
+    color: white;
+    text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+    transform-origin: center;
+    cursor: pointer;
+    transition: color 0.1s ease;
 }
 
 .aircraft-icon:hover {
-	color: lightgrey;
+    color: lightgrey;
 }
 
 .current-location-icon {
-	background-color: white;
-	border-radius: 50%;
-	z-index: 1;
+    background-color: white;
+    border-radius: 50%;
+    z-index: 1;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -58,11 +58,11 @@
 
 .current-location-icon-inner {
     background-color: dodgerblue;
-	border-radius: 50%;
-	height: 15px;
-	width: 15px;
-	z-index: 2;
-	animation: current-location-pulse 3.5s 0.3s ease-in-out infinite;
+    border-radius: 50%;
+    height: 15px;
+    width: 15px;
+    z-index: 2;
+    animation: current-location-pulse 3.5s 0.3s ease-in-out infinite;
 }
 
 @keyframes current-location-pulse {

@@ -67,9 +67,9 @@ iconSize: [22, 22]
 let aircraft = []
 
 let map = L.map('map', {
-	maxZoom: 15,
-	zoomControl: false,
-	attributionControl: false,
+    maxZoom: 15,
+    zoomControl: false,
+    attributionControl: false,
 }).setView([51.505, -0.09], 11);
 
 let tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
