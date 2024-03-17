@@ -5,7 +5,7 @@
 Basic lookup interface for now - delete later
 """
 
-import lookup
+import Lookup
 
 def printdict(dictionary):
     """
