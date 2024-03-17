@@ -38,3 +38,16 @@ function fly(aircraft, heading, speed) {
     	aircraft.setLatLng([newLat, newLng]);
     }, 10);
 }
+
+// Add demo aircraft
+aircraft.push(L.marker([51.5, -0.09], {
+id: '40779a',
+icon: planeIcon
+}).addTo(map));
+
+aircraft.push(L.marker([51.6, -0.1], {
+id: 'copter',
+icon: helicopterIcon
+}).addTo(map));
+
+setHeading(aircraft[0],270)

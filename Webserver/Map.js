@@ -40,16 +40,31 @@ function setTheme(themeName) {
     } else if (themeName === 'watercolour') {
         tileLayerURL = 'https://watercolormaps.collection.cooperhewitt.org/tile/watercolor/{z}/{x}/{y}.jpg';
     } else {
-        // Handle the case when themeName doesn't match any predefined themes
         console.error('Invalid theme name:', themeName);
         return;
     }
     tileLayer.setUrl(tileLayerURL);
 }
 
-let aircraft = []
+const planeIcon = L.divIcon({
+className: 'aircraft-icon',
+html: '<div>&#x2708;</div>',
+iconSize: [32, 32],
+});
 
-//L.Browser.retina = true;
+const helicopterIcon = L.divIcon({
+className: 'aircraft-icon',
+html: '<div class="helicopter-icon">&#xFF0B;</div>',
+iconSize: [32, 32],
+});
+
+const currentLocationIcon = L.divIcon({
+className: 'current-location-icon',
+html: '<div class="current-location-icon-inner"></div>',
+iconSize: [22, 22]
+});
+
+let aircraft = []
 
 let map = L.map('map', {
 	maxZoom: 15,
@@ -59,36 +74,6 @@ let map = L.map('map', {
 
 let tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
 setTheme('default')
-
-const planeIcon = L.divIcon({
-    className: 'aircraft-icon',
-    html: '<div>&#x2708;</div>',
-    iconSize: [32, 32],
-});
-
-const helicopterIcon = L.divIcon({
-    className: 'aircraft-icon',
-    html: '<div class="helicopter-icon">&#xFF0B;</div>',
-    iconSize: [32, 32],
-});
-
-const currentLocationIcon = L.divIcon({
-    className: 'current-location-icon',
-    html: '<div class="current-location-icon-inner"></div>',
-    iconSize: [22, 22]
-});
-
-aircraft.push(L.marker([51.5, -0.09], {
-    id: '40779a',
-    icon: planeIcon
-}).addTo(map));
-
-aircraft.push(L.marker([51.6, -0.1], {
-    id: 'copter',
-    icon: helicopterIcon
-}).addTo(map));
-
-setHeading(aircraft[0],270)
 
 if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {

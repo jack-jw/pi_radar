@@ -8,18 +8,19 @@ document.addEventListener("DOMContentLoaded", function() {
     
     let elements = container.children;
     let maxHeight = 60;
-    let i = 0;
     
-    for (i = 0; i < elements.length; i++) {
+    for (let i = 0; i < elements.length; i++) {
         maxHeight += elements[i].offsetHeight;
     }
     
-    container.addEventListener("touchstart", startResize);
-    
-    document.addEventListener("touchmove", resize);
+    if (maxHeight < window.innerHeight) {
+        maxHeight = window.innerHeight * 0.98;
+    }
     
     container.addEventListener("wheel", scrollResize);
     
+    container.addEventListener("touchstart", startResize);
+    document.addEventListener("touchmove", resize);
     document.addEventListener("touchend", stopResize);
     
     function startResize(e) {
@@ -32,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function resize(e) {
         if (isResizing) {
             let deltaY = (e.clientY || e.touches[0].clientY) - startY;
-            newHeight = startHeight - deltaY;
+            let newHeight = startHeight - deltaY;
             if (newHeight >= minHeight && newHeight <= maxHeight) {
                 container.style.height = newHeight + "px";
             } else if (newHeight < minHeight) {
@@ -61,5 +62,3 @@ document.addEventListener("DOMContentLoaded", function() {
         isResizing = false;
     }
 });
-
-
