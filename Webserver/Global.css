@@ -1,0 +1,118 @@
+:root {
+    font-family: system-ui;
+    --colour: black;
+    --background-colour: #F7F7F6;
+    --accent-control-colour: #BDBDBF;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --colour: white;
+        --background-colour: #222325;
+        --accent-control-colour: #686A6D;
+    }
+    
+}
+
+#map {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    cursor: default;
+}
+
+.aircraft-icon, .current-location-icon {
+    text-align: center;
+    line-height: 32px;
+    width: 32px;
+    height: 32px;
+    margin-top: -16px;
+    margin-left: -16px;
+    font-family: system-ui;
+}
+
+.aircraft-icon {
+	font-size: 24px;
+	color: white;
+	text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+	transform-origin: center;
+	cursor: pointer;
+	transition: color 0.1s ease;
+}
+
+.aircraft-icon:hover {
+	color: lightgrey;
+}
+
+.current-location-icon {
+	background-color: white;
+	border-radius: 50%;
+	z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.current-location-icon-inner {
+    background-color: dodgerblue;
+	border-radius: 50%;
+	height: 15px;
+	width: 15px;
+	z-index: 2;
+	animation: current-location-pulse 3.5s 0.3s ease-in-out infinite;
+}
+
+@keyframes current-location-pulse {
+    0% { transform: scale(1.09) }
+    25% { transform: scale(0.9) }
+    50% { transform: scale(1.09) }
+    100% { transform: scale(1.09) }
+}
+
+.helicopter-icon {
+    animation: helicopter-spin 0.5s linear infinite
+}
+
+@keyframes helicopter-spin {
+    100% { transform: rotate(360deg) }
+}
+
+.resize-handle {
+    margin-top: 5px;
+    width: 50px;
+    height: 5px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: var(--accent-control-colour);
+    border-radius: 2.5px;
+}
+
+.main-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    box-shadow: 0 0 16px 0 rgba(0,0,0,0.2);
+    width: 320px;
+    height: 98vh;
+    background-color: var(--background-colour);
+    color: var(--colour);
+    padding: 0px 15px;
+    margin: 10px 0px 0px 10px;
+    border-radius: 10px 10px 0px 0px;
+    cursor: default;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+@media (max-width: 500px) {
+    .main-container {
+        right: 10px;
+        width: calc(100vw - 30px);
+        margin: 0;
+        height: 25vh;
+    }
+}
