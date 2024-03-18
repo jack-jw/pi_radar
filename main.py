@@ -20,9 +20,9 @@ def printdict(dictionary):
 
 menu = input("Search for a airline, a route, an aircraft or an airport? [l/r/c/p] ")
 if menu == "l":
-    print(lookup.airline(input("Callsign: ")))
+    printdict(lookup.airline(input("Callsign: ")))
 elif menu == "r":
-    print(lookup.route(input("Route: ")))
+    printdict(lookup.route(input("Route: ")))
 elif menu == "c":
     printdict(lookup.aircraft(input("ICAO24 address: ")))
 elif menu == "p":
