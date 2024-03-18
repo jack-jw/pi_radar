@@ -1,5 +1,88 @@
 // Map.js
 
+// MARK: Container scrolling
+document.addEventListener("DOMContentLoaded", function() {
+    const container = document.querySelector(".main-container");
+    
+    let elements = container.children;
+    let maxHeight = 60;
+    const minHeight = 80;
+    
+    for (let i = 0; i < elements.length; i++) {
+        maxHeight += elements[i].offsetHeight;
+    }
+    
+    if (maxHeight < window.innerHeight) {
+        maxHeight = window.innerHeight * 0.985;
+    }
+    
+    container.addEventListener("wheel", resize);
+    container.addEventListener("touchstart", touchStartResize, false);
+    container.addEventListener("touchmove", touchResize, false);
+    container.addEventListener("touchend", touchEndResize, false);
+    
+    let startY;
+    let startHeight;
+    let momentum;
+    
+    function touchStartResize(e) {
+        startY = e.touches[0].clientY;
+        startHeight = container.clientHeight;
+        momentum = 0;
+    }
+    
+    function touchResize(e) {
+        if (!startY) {
+            return;
+        }
+        
+        let deltaY = startY - e.touches[0].clientY;
+        momentum = deltaY * 0.2; // 0.2 is scroll multiplier
+        
+        let newHeight = startHeight + deltaY;
+        
+        if (newHeight >= minHeight && newHeight <= maxHeight) {
+            container.style.height = newHeight + "px";
+        } else if (newHeight < minHeight) {
+            container.style.height = minHeight + "px";
+        } else if (newHeight > maxHeight) {
+            container.style.height = maxHeight + "px";
+        }
+        
+        e.preventDefault();
+    }
+    
+    function touchEndResize(e) {
+        startY = null;
+        startHeight = null;
+        if (momentum !== 0) {
+            let interval = setInterval(function() {
+                let newHeight = container.clientHeight + momentum;
+                if (newHeight >= minHeight && newHeight <= maxHeight) {
+                    container.style.height = newHeight + "px";
+                    momentum *= 0.9; // 0.9 is decay rate
+                } else {
+                    clearInterval(interval);
+                }
+            }, 32);
+        }
+    }
+    
+    function resize(e) {
+        let delta = e.deltaY;
+        let newHeight = container.clientHeight + delta;
+        if (newHeight >= minHeight && newHeight <= maxHeight) {
+            container.style.height = newHeight + "px";
+        } else if (newHeight < minHeight) {
+            container.style.height = minHeight + "px";
+        } else if (newHeight > maxHeight) {
+            container.style.height = maxHeight + "px";
+        }
+        e.preventDefault();
+    }
+});
+
+// MARK: - The map
 function setHeading(aircraft, heading) {
     let aircraftElement = aircraft.getElement();
     let aircraftElementInner = aircraftElement.querySelector("div");
@@ -75,6 +158,7 @@ let map = L.map('map', {
 let tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
 setTheme('default')
 
+// Check for location - remove because of lack of https?
 if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
         let userLat = position.coords.latitude;
