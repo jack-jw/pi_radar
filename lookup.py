@@ -9,7 +9,7 @@ Functions:
     update()
     add_routes()
     
-    Lookup:
+    Lookup
     airline()
     aircraft()
     airport()
