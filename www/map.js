@@ -4,28 +4,44 @@
 document.addEventListener("DOMContentLoaded", function() {
     const container = document.querySelector(".main-container");
     
+    let startY;
+    let startHeight;
+    let momentum;
     let elements = container.children;
     let maxHeight = 60;
     const minHeight = 80;
-    
-    for (let i = 0; i < elements.length; i++) {
-        maxHeight += elements[i].offsetHeight;
-    }
-    
-    if (maxHeight < window.innerHeight) {
-        maxHeight = window.innerHeight * 0.985;
-    }
     
     container.addEventListener("wheel", resize);
     container.addEventListener("touchstart", touchStartResize, false);
     container.addEventListener("touchmove", touchResize, false);
     container.addEventListener("touchend", touchEndResize, false);
     
-    let startY;
-    let startHeight;
-    let momentum;
+    function setMaxHeight() {
+        if (window.innerWidth > 500) {
+            for (let i = 0; i < elements.length; i++) {
+                maxHeight += elements[i].offsetHeight;
+            }
+            
+            if (maxHeight < window.innerHeight) {
+                maxHeight = window.innerHeight - 10;
+            }
+            
+        } else {
+            maxHeight = window.innerHeight;
+        }
+    }
+    
+    function setRadius() {
+        if (container.clientHeight == window.innerHeight) {
+            container.style.borderRadius = "0";
+        } else {
+            container.style.borderTopLeftRadius = "10px";
+            container.style.borderTopRightRadius = "10px";
+        }
+    }
     
     function touchStartResize(e) {
+        setMaxHeight()
         startY = e.touches[0].clientY;
         startHeight = container.clientHeight;
         momentum = 0;
@@ -50,7 +66,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         
         e.preventDefault();
+        setRadius()
     }
+    
     
     function touchEndResize(e) {
         startY = null;
@@ -66,9 +84,17 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }, 32);
         }
+        if (container.clientHeight == window.innerHeight) {
+            container.style.borderRadius = "0";
+        } else {
+            container.style.borderTopLeftRadius = "10px";
+            container.style.borderTopRightRadius = "10px";
+        }
+        setRadius()
     }
     
     function resize(e) {
+        setMaxHeight()
         let delta = e.deltaY;
         let newHeight = container.clientHeight + delta;
         if (newHeight >= minHeight && newHeight <= maxHeight) {
@@ -79,6 +105,7 @@ document.addEventListener("DOMContentLoaded", function() {
             container.style.height = maxHeight + "px";
         }
         e.preventDefault();
+        setRadius()
     }
 });
 
