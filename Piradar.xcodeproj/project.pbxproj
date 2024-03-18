@@ -8,7 +8,6 @@
 
 /* Begin PBXFileReference section */
 		3111AEEA2BA78BAA005930AA /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; lineEnding = 0; path = README.md; sourceTree = "<group>"; };
-		3111AEEB2BA78BAA005930AA /* container.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; lineEnding = 0; path = container.js; sourceTree = "<group>"; };
 		3111AEEC2BA78BAA005930AA /* debug.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; lineEnding = 0; path = debug.js; sourceTree = "<group>"; };
 		3111AEED2BA78BAA005930AA /* global.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; lineEnding = 0; path = global.css; sourceTree = "<group>"; };
 		3111AEEE2BA78BAA005930AA /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; lineEnding = 0; path = index.html; sourceTree = "<group>"; };
@@ -25,7 +24,6 @@
 				3111AEEE2BA78BAA005930AA /* index.html */,
 				3111AEED2BA78BAA005930AA /* global.css */,
 				3111AEEF2BA78BAA005930AA /* map.js */,
-				3111AEEB2BA78BAA005930AA /* container.js */,
 				3111AEEC2BA78BAA005930AA /* debug.js */,
 			);
 			path = Webserver;
