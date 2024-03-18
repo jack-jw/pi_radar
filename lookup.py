@@ -117,7 +117,7 @@ def _get_row(table, search_column, query):
     result = cursor.fetchone()
     cursor.close()
     main_db.close()
-    
+
     if result:
         result = dict(result)
     return result
