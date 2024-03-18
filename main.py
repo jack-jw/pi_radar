@@ -3,6 +3,7 @@
 
 """
 Basic lookup interface for now - delete later
+Better to test functions through the lookup module.
 """
 
 import lookup
