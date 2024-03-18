@@ -5,11 +5,11 @@
 Basic lookup interface for now - delete later
 """
 
-import Lookup
+import lookup
 
 def printdict(dictionary):
     """
-    Prints the passed dictionary.
+    Prints the passed dictionary nicely.
     """
 
     if dictionary is not None:

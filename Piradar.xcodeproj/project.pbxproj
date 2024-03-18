@@ -8,11 +8,11 @@
 
 /* Begin PBXFileReference section */
 		3111AEEA2BA78BAA005930AA /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		3111AEEB2BA78BAA005930AA /* Container.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Container.js; sourceTree = "<group>"; };
-		3111AEEC2BA78BAA005930AA /* Debug.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Debug.js; sourceTree = "<group>"; };
-		3111AEED2BA78BAA005930AA /* Global.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Global.css; sourceTree = "<group>"; };
-		3111AEEE2BA78BAA005930AA /* Index.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = Index.html; sourceTree = "<group>"; };
-		3111AEEF2BA78BAA005930AA /* Map.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Map.js; sourceTree = "<group>"; };
+		3111AEEB2BA78BAA005930AA /* container.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = container.js; sourceTree = "<group>"; };
+		3111AEEC2BA78BAA005930AA /* debug.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = debug.js; sourceTree = "<group>"; };
+		3111AEED2BA78BAA005930AA /* global.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = global.css; sourceTree = "<group>"; };
+		3111AEEE2BA78BAA005930AA /* index.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
+		3111AEEF2BA78BAA005930AA /* map.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = map.js; sourceTree = "<group>"; };
 		317B09E42BA762D0006803B3 /* main.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = main.py; sourceTree = "<group>"; };
 		317B09E82BA762D1006803B3 /* lookup.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = lookup.py; sourceTree = "<group>"; };
 		317B09E92BA762D1006803B3 /* jetphotos.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = jetphotos.py; sourceTree = "<group>"; };
@@ -22,11 +22,11 @@
 		3111AEF02BA78BAA005930AA /* Webserver */ = {
 			isa = PBXGroup;
 			children = (
-				3111AEEE2BA78BAA005930AA /* Index.html */,
-				3111AEED2BA78BAA005930AA /* Global.css */,
-				3111AEEF2BA78BAA005930AA /* Map.js */,
-				3111AEEB2BA78BAA005930AA /* Container.js */,
-				3111AEEC2BA78BAA005930AA /* Debug.js */,
+				3111AEEE2BA78BAA005930AA /* index.html */,
+				3111AEED2BA78BAA005930AA /* global.css */,
+				3111AEEF2BA78BAA005930AA /* map.js */,
+				3111AEEB2BA78BAA005930AA /* container.js */,
+				3111AEEC2BA78BAA005930AA /* debug.js */,
 			);
 			path = Webserver;
 			sourceTree = "<group>";
