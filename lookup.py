@@ -2,28 +2,39 @@
 # Lookup.py
 
 """
-Manage and look up aircraft/airports/airlines/routes using the local database
+Manage and look up aircraft/airports/airlines/routes using the local database.
+
+Functions:
+    Database management
+    update()
+    add_routes()
+    
+    Lookup:
+    airline()
+    aircraft()
+    airport()
+    route()
 """
 
 import sqlite3
+from csv import reader
+from requests import get
+from bs4 import BeautifulSoup
 
 _DATABASE = "Main.db"
 _AIRCRAFT_URL = "https://opensky-network.org/datasets/metadata/aircraftDatabase.csv"
 _AIRPORTS_URL = "https://davidmegginson.github.io/ourairports-data/airports.csv"
-_CODES_WIKI_URL = "https://en.wikipedia.org/wiki/List_of_airline_codes"
+_AIRLINE_CODES_WIKI_URL = "https://en.wikipedia.org/wiki/List_of_airline_codes"
 
-# MARK: Internal functions
-def _get_codes_table():
+# MARK: - Internal functions
+def _get_airlines_table():
     """
-    Internal, use update("codes") externally
+    Internal, use update("airlines").
     
-    Get the codes table from wikipedia and add it to the database
+    Get the airlines table from wikipedia and add it to the database.
     """
 
-    from requests import get
-    from bs4 import BeautifulSoup
-
-    response = get(_CODES_WIKI_URL)
+    response = get(_AIRLINE_CODES_WIKI_URL, timeout=300)
     soup = BeautifulSoup(response.content, "html.parser")
     table = soup.find("table", class_="wikitable")
 
@@ -31,17 +42,23 @@ def _get_codes_table():
     cursor = main_db.cursor()
 
     try:
-        cursor.execute("DROP TABLE Codes")
+        cursor.execute("DROP TABLE Airlines")
     except sqlite3.OperationalError:
         pass
 
-    cursor.execute("CREATE TABLE Codes ('IATA code' TEXT, 'ICAO code' TEXT, 'Airline' TEXT, 'Callsign' TEXT, 'Country' TEXT)")
+    cursor.execute("CREATE TABLE Airlines "
+                   "('IATA code' TEXT, "
+                   "'ICAO code' TEXT, "
+                   "'Airline' TEXT, "
+                   "'Callsign' TEXT, "
+                   "'Country' TEXT)")
+
     rows = table.find_all("tr")[1:]
     for row in rows:
         cols = row.find_all("td")
         data = [col.get_text(strip=True) for col in cols]
         data += [None] * (6 - len(data))
-        cursor.execute("INSERT INTO Codes VALUES (?, ?, ?, ?, ?)", data[:5])
+        cursor.execute("INSERT INTO Airlines VALUES (?, ?, ?, ?, ?)", data[:5])
 
     cursor.close()
     main_db.commit()
@@ -49,16 +66,13 @@ def _get_codes_table():
 
 def _csv_to_db(database, url, table_name, column_names):
     """
-    Internal, use update() function to update a DB
-    
-    Get a CSV from the web and add it to the database
-    Takes a database, a URL and a table name as a string and column names as a tuple
+    Internal, use update() function to update a DB.
+
+    Get a CSV from the web and add it to the database.
+    Takes a database, a URL and a table name as a string and column names as a tuple.
     """
 
-    from requests import get
-    from csv import reader
-
-    response = get(url)
+    response = get(url, timeout=300)
     data = response.text.splitlines()
     main_db = sqlite3.connect(database)
     cursor = main_db.cursor()
@@ -74,19 +88,50 @@ def _csv_to_db(database, url, table_name, column_names):
     csv_reader = reader(data)
     next(csv_reader)
     for row in csv_reader:
-        cursor.execute(f"INSERT INTO {table_name} VALUES ({', '.join(['?' for _ in range(len(column_names))])})", row)
+        cursor.execute(f"INSERT INTO {table_name} "
+                       f"VALUES ({', '.join(['?' for _ in range(len(column_names))])}"
+                       ")", row)
 
     cursor.close()
     main_db.commit()
     main_db.close()
 
-# MARK: Main functions
+def _get_row(table, search_column, query):
+    """
+    Internal, use the lookup functions.
+    
+    Get a row from the DB as a dictionary.
+    Takes a table, search column, and query as strings.
+    Returns the row as a dictionary.
+    """
+
+    main_db = sqlite3.connect(_DATABASE)
+    main_db.row_factory = sqlite3.Row
+    cursor = main_db.cursor()
+
+    try:
+        cursor.execute(f"SELECT * FROM {table} WHERE `{search_column}` = '{query}'")
+    except sqlite3.OperationalError:
+        update(table)
+
+    result = cursor.fetchone()
+    cursor.close()
+    main_db.close()
+    
+    if result:
+        result = dict(result)
+    return result
+
+# MARK: - Main functions
+
+# MARK: Database management
 def update(table):
     """
-    Update a table in the database
-    Takes a table name as a string (aircraft/airports/codes/routes/all)
-    Updating the routes table just creates it if it doesn't exist
-        Use add_routes("path/to/csv") to add routes
+    Update a table in the database.
+    Takes a table name as a string - can be "all".
+    
+    Updating the routes table just creates it if it doesn't exist.
+    Use add_routes("/path/to/csv") to add routes.
     """
 
     table = table.lower()
@@ -147,8 +192,8 @@ def update(table):
 
         _csv_to_db(_DATABASE, _AIRPORTS_URL, "Airports", airport_headers)
 
-    elif table == "codes":
-        _get_codes_table()
+    elif table == "airlines":
+        _get_airlines_table()
 
     elif table == "routes":
         main_db = sqlite3.connect(_DATABASE)
@@ -163,7 +208,7 @@ def update(table):
         main_db.close()
 
     elif table == "all":
-        for table_name in ("aircraft", "airports", "codes", "routes"):
+        for table_name in ("aircraft", "airports", "airlines", "routes"):
             update(table_name)
 
     else:
@@ -171,11 +216,9 @@ def update(table):
 
 def add_routes(csv):
     """
-    Add routes to the database from CSV file
-    Takes the path to a CSV file as a string
+    Add routes to the database from CSV file.
+    Takes the path to a CSV file as a string.
     """
-
-    from csv import reader
 
     with open(csv, "r", newline="", encoding="utf-8") as csv_file:
         csv_reader = reader(csv_file)
@@ -186,90 +229,53 @@ def add_routes(csv):
         next(csv_reader)
 
         for row in csv_reader:
-            cursor.execute("INSERT INTO Routes (Callsign, Origin, Destination) VALUES (?, ?, ?)", row)
+            cursor.execute("INSERT INTO Routes "
+                           "(Callsign, "
+                           "Origin, "
+                           "Destination) "
+                           "VALUES (?, ?, ?)", row)
 
         main_db.commit()
     cursor.close()
     main_db.close()
 
+# MARK: Lookup
 def airline(callsign):
     """
-    Look up an aircraft
-    Takes an airline's ICAO code as a string
-    Returns the airline's name as a string
+    Look up an aircraft.
+    Takes an airline's ICAO code as a string.
+    Returns airline info as a dictionary with keys as defined in _get_wiki_table().
     """
 
-    callsign = callsign.upper()
-    code = callsign[:3]
-    main_db = sqlite3.connect(_DATABASE)
-    cursor = main_db.cursor()
-    cursor.execute(f"SELECT Airline FROM Codes WHERE `ICAO code` = '{code}'")
-    result = cursor.fetchone()
-    cursor.close()
-    main_db.close()
-
-    if result:
-        result = result[0]
-    return result
-
+    code = callsign.upper()[:3]
+    return _get_row("Airlines", "ICAO code",code)
 
 def aircraft(address):
     """
-    Look up an aircraft
-    Takes the aircraft's ICAO 24-bit address as a string
-    Returns the aircraft info as a dictionary
+    Look up an aircraft.
+    Takes the aircraft's ICAO 24-bit address as a string.
+    Returns aircraft info as a dictionary with keys as defined in update().
     """
 
     address = address.lower()
-    main_db = sqlite3.connect(_DATABASE)
-    main_db.row_factory = sqlite3.Row
-    cursor = main_db.cursor()
-    cursor.execute(f"SELECT * FROM Aircraft WHERE `ICAO24 address` = '{address}'")
-    result = cursor.fetchone()
-    cursor.close()
-    main_db.close()
-
-    if result:
-        result = dict(result)
-    return result
-
+    return _get_row("Aircraft", "ICAO24 address",address)
 
 def airport(iata):
     """
-    Look up an airport
-    Takes the airport's 3-digit IATA code as a string
-    Returns the airport info as a dictionary
+    Look up an airport.
+    Takes the airport's 3-digit IATA code as a string.
+    Returns airport info as a dictionary with keys as defined in update().
     """
 
     iata = iata.upper()
-    main_db = sqlite3.connect(_DATABASE)
-    main_db.row_factory = sqlite3.Row
-    cursor = main_db.cursor()
-    cursor.execute(f"SELECT * FROM Airports WHERE `IATA code` = '{iata}'")
-    result = cursor.fetchone()
-    cursor.close()
-    main_db.close()
-
-    if result:
-        result = dict(result)
-    return result
+    return _get_row("Airports", "IATA code",iata)
 
 def route(callsign):
     """
-    Look up a route
-    Takes a callsign as a string
-    Returns the route as a dictionary with keys Callsign, Origin, Destination
+    Look up a route.
+    Takes a callsign as a string.
+    Returns the route as a dictionary with keys Callsign, Origin, and Destination.
     """
 
     callsign = callsign.upper()
-    main_db = sqlite3.connect(_DATABASE)
-    main_db.row_factory = sqlite3.Row
-    cursor = main_db.cursor()
-    cursor.execute(f"SELECT * FROM Routes WHERE `Callsign` = '{callsign}'")
-    result = cursor.fetchone()
-    cursor.close()
-    main_db.close()
-
-    if result:
-        result = dict(result)
-    return result
+    return _get_row("Routes", "Callsign",callsign)
