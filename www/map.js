@@ -109,31 +109,33 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
-// MARK: - The map
+// MARK: - Map
+
 function setHeading(aircraft, heading) {
-    let aircraftElement = aircraft.getElement();
-    let aircraftElementInner = aircraftElement.querySelector("div");
+    const marker = aircraft['marker']
+    const markerElement = marker.getElement();
+    const markerElementInner = markerElement.querySelector("div");
     heading = heading - 90
-    aircraftElementInner.style.transition = "transform 0.5s ease";
-    aircraftElementInner.style.transform = "rotate(" + heading + "deg)";
-    setTimeout(() => {}, 5000);
+    markerElementInner.style.transition = "transform 0.5s ease";
+    markerElementInner.style.transform = "rotate(" + heading + "deg)";
 }
 
 function setCoordinates(aircraft, endPoint) {
-    let aircraftLocation = aircraft.getLatLng();
-    let startPoint = [aircraftLocation.lat, aircraftLocation.lng];
+    const marker = aircraft['marker']
+    const markerLocation = marker.getLatLng();
+    const startPoint = [markerLocation.lat, markerLocation.lng];
     
-    let numSteps = 60;
-    let stepDuration = 250 / numSteps; // animation duration / steps
-    let latStep = (endPoint[0] - startPoint[0]) / numSteps;
-    let lngStep = (endPoint[1] - startPoint[1]) / numSteps;
+    const numSteps = 60;
+    const stepDuration = 250 / numSteps; // animation duration / steps
+    const latStep = (endPoint[0] - startPoint[0]) / numSteps;
+    const lngStep = (endPoint[1] - startPoint[1]) / numSteps;
     
     let step = 0;
-    let markerAnimation = setInterval(function() {
+    const markerAnimation = setInterval(function() {
         if (step < numSteps) {
             let newLat = startPoint[0] + (latStep * step);
             let newLng = startPoint[1] + (lngStep * step);
-            aircraft.setLatLng([newLat, newLng]);
+            marker.setLatLng([newLat, newLng]);
             step++;
         } else {
             clearInterval(markerAnimation);
@@ -156,25 +158,17 @@ function setTheme(themeName) {
     tileLayer.setUrl(tileLayerURL);
 }
 
-const planeIcon = L.divIcon({
-className: 'aircraft-icon',
-html: '<div>&#x2708;</div>',
-iconSize: [32, 32],
+const plane = L.divIcon({
+    className: 'aircraft-icon',
+    html: '<div>&#x2708;</div>',
+    iconSize: [32, 32],
 });
 
-const helicopterIcon = L.divIcon({
-className: 'aircraft-icon',
-html: '<div class="helicopter-icon">&#xFF0B;</div>',
-iconSize: [32, 32],
+const helicopter = L.divIcon({
+    className: 'aircraft-icon',
+    html: '<div class="helicopter-icon">&#xFF0B;</div>',
+    iconSize: [32, 32],
 });
-
-const currentLocationIcon = L.divIcon({
-className: 'current-location-icon',
-html: '<div class="current-location-icon-inner"></div>',
-iconSize: [22, 22]
-});
-
-let aircraft = []
 
 let map = L.map('map', {
     maxZoom: 15,
@@ -183,20 +177,44 @@ let map = L.map('map', {
 }).setView([51.505, -0.09], 11);
 
 let tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
-setTheme('default')
 
-// Check for location - remove because of lack of https?
-if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-        let userLat = position.coords.latitude;
-        let userLng = position.coords.longitude;
-        map.setView([userLat, userLng], 11);
-        L.marker([userLat, userLng], {icon: currentLocationIcon}).addTo(map)
-        
-        document.addEventListener('keydown', function(event) {
-            if (event.metaKey && event.keyCode === 75) {
-                map.setView([userLat, userLng], 11);
-            }
-        });
-    });
+// MARK: Aircraft
+let aircraft = {};
+
+// Add demos
+aircraft['icao-code-of-an-aeroplane'] = {
+    'lat': 51.5,
+    'lng': -0.3,
+    'heading': 245,
+    'icon': plane,
+    'icao24': 'icao-code-of-an-aeroplane',
+    // etc
+};
+
+aircraft['icao-code-of-another-aeroplane'] = {
+    'lat': 51.4,
+    'lng': -0.2,
+    'heading': 45,
+    'icon': plane,
+    'icao24': 'icao-code-of-another-aeroplane',
+};
+
+aircraft['icao-code-of-a-helicopter'] = {
+    'lat': 51.6,
+    'lng': -0.1,
+    'heading': 90,
+    'icon': helicopter,
+    'icao24': 'icao-code-of-a-helicopter',
+};
+
+// Add aircraft to map
+for (let key in aircraft) {
+    let each = aircraft[key];
+    
+    each['marker'] = L.marker([each['lat'], each['lng']], {
+        icon: each['icon'],
+        id: each['icao24']
+    }).addTo(map);
+    
+    if (each['icon'] !== helicopter) { setHeading(each, each['heading']) }
 }
