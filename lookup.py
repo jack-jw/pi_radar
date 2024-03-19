@@ -21,7 +21,7 @@ from csv import reader
 from requests import get
 from bs4 import BeautifulSoup
 
-_DATABASE = "Main.db"
+_DATABASE = "main.db"
 _AIRCRAFT_URL = "https://opensky-network.org/datasets/metadata/aircraftDatabase.csv"
 _AIRPORTS_URL = "https://davidmegginson.github.io/ourairports-data/airports.csv"
 _AIRLINE_CODES_WIKI_URL = "https://en.wikipedia.org/wiki/List_of_airline_codes"
