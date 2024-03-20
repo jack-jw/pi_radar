@@ -7,9 +7,9 @@ document.addEventListener("DOMContentLoaded", function() {
     let startY;
     let startHeight;
     let momentum;
-    let elements = container.children;
     let maxHeight = 60;
     const minHeight = 80;
+    const elements = container.children;
     
     container.addEventListener("wheel", resize);
     container.addEventListener("touchstart", touchStartResize, false);
@@ -52,10 +52,10 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
         
-        let deltaY = startY - e.touches[0].clientY;
+        const deltaY = startY - e.touches[0].clientY;
         momentum = deltaY * 0.2; // 0.2 is scroll multiplier
         
-        let newHeight = startHeight + deltaY;
+        const newHeight = startHeight + deltaY;
         
         if (newHeight >= minHeight && newHeight <= maxHeight) {
             container.style.height = newHeight + "px";
@@ -74,8 +74,8 @@ document.addEventListener("DOMContentLoaded", function() {
         startY = null;
         startHeight = null;
         if (momentum !== 0) {
-            let interval = setInterval(function() {
-                let newHeight = container.clientHeight + momentum;
+            const interval = setInterval(function() {
+                const newHeight = container.clientHeight + momentum;
                 if (newHeight >= minHeight && newHeight <= maxHeight) {
                     container.style.height = newHeight + "px";
                     momentum *= 0.9; // 0.9 is decay rate
@@ -158,58 +158,92 @@ function setTheme(themeName) {
     tileLayer.setUrl(tileLayerURL);
 }
 
+const map = L.map('map', {
+maxZoom: 15,
+zoomControl: false,
+attributionControl: false,
+}).setView([51.505, -0.09], 11);
+
+const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
+
 const plane = L.divIcon({
     className: 'aircraft-icon',
     html: '<div>&#x2708;</div>',
-    iconSize: [32, 32],
+    iconSize: [32, 32]
 });
 
 const helicopter = L.divIcon({
     className: 'aircraft-icon',
     html: '<div class="helicopter-icon">&#xFF0B;</div>',
-    iconSize: [32, 32],
+    iconSize: [32, 32]
 });
 
-let map = L.map('map', {
-    maxZoom: 15,
-    zoomControl: false,
-    attributionControl: false,
-}).setView([51.505, -0.09], 11);
-
-let tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
+const other = L.divIcon({
+    className: 'aircraft-icon',
+    html: '<div>&#x27A4;</div>',
+    iconSize: [32, 32]
+});
 
 // MARK: Aircraft
 let aircraft = {};
 
 // Add demos
-aircraft['icao-code-of-an-aeroplane'] = {
+aircraft['aeroplane1'] = {
     'lat': 51.5,
     'lng': -0.3,
-    'heading': 245,
+    'heading': 70,
+    'altitude': 2000,
+    'xspeed': 300,
+    'yspeed': 10,
     'icon': plane,
-    'icao24': 'icao-code-of-an-aeroplane',
-    // etc
+    'icao24': 'aeroplane1',
+    'callsign': 'BAW15'
 };
 
-aircraft['icao-code-of-another-aeroplane'] = {
+aircraft['aeroplane2'] = {
     'lat': 51.4,
     'lng': -0.2,
-    'heading': 45,
+    'heading': 350,
+    'altitude': 1500,
+    'xspeed': 200,
+    'yspeed': -10,
     'icon': plane,
-    'icao24': 'icao-code-of-another-aeroplane',
+    'icao24': 'aeroplane2',
+    'callsign': 'QFA2'
 };
 
-aircraft['icao-code-of-a-helicopter'] = {
+aircraft['helicopter'] = {
     'lat': 51.6,
     'lng': -0.1,
     'heading': 90,
+    'altitude': 500,
+    'xspeed': 30,
+    'yspeed': 5,
     'icon': helicopter,
-    'icao24': 'icao-code-of-a-helicopter',
+    'icao24': 'helicopter',
 };
+
+aircraft['ufo'] = {
+    'lat': 51.55,
+    'lng': 0,
+    'heading': 30,
+    'icon': other,
+    'icao24': 'ufo',
+};
+// End demos
+
+// Load actual planes
+//socket.on('aircraft', function(payload) {
+//    aircraft = {
+//        ...aircraft
+//        ...payload
+//    }
+//});
+
 
 // Add aircraft to map
 for (let key in aircraft) {
-    let each = aircraft[key];
+    const each = aircraft[key];
     
     each['marker'] = L.marker([each['lat'], each['lng']], {
         icon: each['icon'],
