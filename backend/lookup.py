@@ -8,7 +8,7 @@ Functions:
     Database management
     update()
     add_routes()
-    
+
     Lookup
     airline()
     aircraft()
@@ -19,10 +19,11 @@ Functions:
 import logging
 import sqlite3
 from csv import reader
-from requests import get
+import requests
 from bs4 import BeautifulSoup
 
-_DATABASE = "main.db"
+_DATABASE = "../instance/main.db"
+_ROUTES_DATABASE = "../instance/routes.db"
 _AIRCRAFT_URL = "https://opensky-network.org/datasets/metadata/aircraftDatabase.csv"
 _AIRPORTS_URL = "https://davidmegginson.github.io/ourairports-data/airports.csv"
 _AIRLINE_CODES_WIKI_URL = "https://en.wikipedia.org/wiki/List_of_airline_codes"
@@ -37,17 +38,17 @@ def _get_airlines_table():
 
     logging.info(f"Downloading Airlines table from {_AIRLINE_CODES_WIKI_URL}")
     try:
-        response = get(_AIRLINE_CODES_WIKI_URL, timeout=120)
+        response = requests.get(_AIRLINE_CODES_WIKI_URL, timeout=120)
         if not response.ok:
-            logging.error("Download failed:",response.status_code)
+            logging.error(f"Download failed: {response.status_code}")
             return
-    except Timeout:
+    except requests.exceptions.ReadTimeout:
         logging.error("Took too long to download")
         return
 
     soup = BeautifulSoup(response.content, "html.parser")
     table = soup.find("table", class_="wikitable")
-    
+
     logging.debug("Connecting to the database")
     main_db = sqlite3.connect(_DATABASE)
     cursor = main_db.cursor()
@@ -89,16 +90,16 @@ def _csv_to_db(database, url, table_name, column_names):
 
     logging.info(f"Downloading {table_name} table from {url}")
     try:
-        response = get(url, timeout=300)
+        response = requests.get(url, timeout=300)
         if not response.ok:
-            logging.error("Download failed:",response.status_code)
+            logging.error(f"Download failed: {response.status_code}")
             return
-    except Timeout:
+    except requests.exceptions.ReadTimeout:
         logging.error("Took too long to download")
         return
 
     data = response.text.splitlines()
-    
+
     logging.debug("Connecting to the database")
     main_db = sqlite3.connect(database)
     cursor = main_db.cursor()
@@ -136,9 +137,10 @@ def _get_row(table, search_column, query):
     """
 
     logging.debug("Connecting to the database")
-    main_db = sqlite3.connect(_DATABASE)
-    main_db.row_factory = sqlite3.Row
-    cursor = main_db.cursor()
+    db_path = _ROUTES_DATABASE if table == "Routes" else _DATABASE
+    db = sqlite3.connect(db_path)
+    db.row_factory = sqlite3.Row
+    cursor = db.cursor()
 
     while True:
         try:
@@ -150,7 +152,7 @@ def _get_row(table, search_column, query):
 
     result = cursor.fetchone()
     cursor.close()
-    main_db.close()
+    db.close()
 
     if result:
         result = dict(result)
@@ -230,16 +232,16 @@ def update(table):
         _get_airlines_table()
 
     elif table == "routes":
-        main_db = sqlite3.connect(_DATABASE)
-        cursor = main_db.cursor()
+        routes_db = sqlite3.connect(_ROUTES_DATABASE)
+        cursor = routes_db.cursor()
 
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name = 'Routes'")
         if cursor.fetchone() is None:
             cursor.execute("CREATE TABLE Routes (Callsign TEXT, Origin TEXT, Destination TEXT)")
 
         cursor.close()
-        main_db.commit()
-        main_db.close()
+        routes_db.commit()
+        routes_db.close()
 
     elif table == "all":
         for table_name in ("aircraft", "airports", "airlines", "routes"):
@@ -257,8 +259,8 @@ def add_routes(csv):
     with open(csv, "r", newline="", encoding="utf-8") as csv_file:
         csv_reader = reader(csv_file)
 
-        main_db = sqlite3.sqlite3.connect(_DATABASE)
-        cursor = main_db.cursor()
+        routes_db = sqlite3.sqlite3.connect(_ROUTES_DATABASE)
+        cursor = routes_db.cursor()
 
         next(csv_reader)
 
@@ -269,9 +271,9 @@ def add_routes(csv):
                            "Destination) "
                            "VALUES (?, ?, ?)", row)
 
-        main_db.commit()
+        routes_db.commit()
     cursor.close()
-    main_db.close()
+    routes_db.close()
 
 # MARK: Lookup
 def airline(callsign):
