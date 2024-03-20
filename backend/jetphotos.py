@@ -1,5 +1,5 @@
 # Piradar
-# JetPhotos.py
+# jetphotos.py
 
 """
 Get images of aircraft from JetPhotos

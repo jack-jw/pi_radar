@@ -1,5 +1,5 @@
 # Piradar
-# Lookup.py
+# lookup.py
 
 """
 Manage and look up aircraft/airports/airlines/routes using the local database.
@@ -16,6 +16,7 @@ Functions:
     route()
 """
 
+import logging
 import sqlite3
 from csv import reader
 from requests import get
@@ -34,18 +35,30 @@ def _get_airlines_table():
     Get the airlines table from wikipedia and add it to the database.
     """
 
-    response = get(_AIRLINE_CODES_WIKI_URL, timeout=300)
+    logging.info(f"Downloading Airlines table from {_AIRLINE_CODES_WIKI_URL}")
+    try:
+        response = get(_AIRLINE_CODES_WIKI_URL, timeout=120)
+        if not response.ok:
+            logging.error("Download failed:",response.status_code)
+            return
+    except Timeout:
+        logging.error("Took too long to download")
+        return
+
     soup = BeautifulSoup(response.content, "html.parser")
     table = soup.find("table", class_="wikitable")
-
+    
+    logging.debug("Connecting to the database")
     main_db = sqlite3.connect(_DATABASE)
     cursor = main_db.cursor()
 
     try:
         cursor.execute("DROP TABLE Airlines")
+        logging.debug("Airlines table dropped in database")
     except sqlite3.OperationalError:
-        pass
+        logging.debug("Airlines table doesn't exist in database")
 
+    logging.debug("Creating Airlines table")
     cursor.execute("CREATE TABLE Airlines "
                    "('IATA code' TEXT, "
                    "'ICAO code' TEXT, "
@@ -54,6 +67,7 @@ def _get_airlines_table():
                    "'Country' TEXT)")
 
     rows = table.find_all("tr")[1:]
+    logging.info("Adding data to the database")
     for row in rows:
         cols = row.find_all("td")
         data = [col.get_text(strip=True) for col in cols]
@@ -63,6 +77,7 @@ def _get_airlines_table():
     cursor.close()
     main_db.commit()
     main_db.close()
+    logging.info("Done")
 
 def _csv_to_db(database, url, table_name, column_names):
     """
@@ -72,21 +87,35 @@ def _csv_to_db(database, url, table_name, column_names):
     Takes a database, a URL and a table name as a string and column names as a tuple.
     """
 
-    response = get(url, timeout=300)
+    logging.info(f"Downloading {table_name} table from {url}")
+    try:
+        response = get(url, timeout=300)
+        if not response.ok:
+            logging.error("Download failed:",response.status_code)
+            return
+    except Timeout:
+        logging.error("Took too long to download")
+        return
+
     data = response.text.splitlines()
+    
+    logging.debug("Connecting to the database")
     main_db = sqlite3.connect(database)
     cursor = main_db.cursor()
 
     try:
         cursor.execute(f"DROP TABLE {table_name}")
+        logging.debug(f"{table_name} table dropped in database")
     except sqlite3.OperationalError:
-        pass
+        logging.debug(f"{table_name} doesn't exist in database")
 
+    logging.debug(f"Creating {table_name} table")
     columns_str = ", ".join([f"'{col}' TEXT" for col in column_names])
     cursor.execute(f"CREATE TABLE {table_name} ({columns_str})")
 
     csv_reader = reader(data)
     next(csv_reader)
+    logging.info("Adding data to the database")
     for row in csv_reader:
         cursor.execute(f"INSERT INTO {table_name} "
                        f"VALUES ({', '.join(['?' for _ in range(len(column_names))])}"
@@ -95,6 +124,7 @@ def _csv_to_db(database, url, table_name, column_names):
     cursor.close()
     main_db.commit()
     main_db.close()
+    logging.info("Done")
 
 def _get_row(table, search_column, query):
     """
@@ -105,14 +135,18 @@ def _get_row(table, search_column, query):
     Returns the row as a dictionary.
     """
 
+    logging.debug("Connecting to the database")
     main_db = sqlite3.connect(_DATABASE)
     main_db.row_factory = sqlite3.Row
     cursor = main_db.cursor()
 
-    try:
-        cursor.execute(f"SELECT * FROM {table} WHERE `{search_column}` = '{query}'")
-    except sqlite3.OperationalError:
-        update(table)
+    while True:
+        try:
+            cursor.execute(f"SELECT * FROM {table} WHERE `{search_column}` = '{query}'")
+            break
+        except sqlite3.OperationalError:
+            logging.error(f"{table} table does not exist in database")
+            update(table)
 
     result = cursor.fetchone()
     cursor.close()

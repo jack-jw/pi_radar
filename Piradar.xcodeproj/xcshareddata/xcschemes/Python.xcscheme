@@ -37,7 +37,7 @@
       disableMainThreadChecker = "YES"
       launchStyle = "0"
       useCustomWorkingDirectory = "YES"
-      customWorkingDirectory = "~/Developer/Piradar"
+      customWorkingDirectory = "~/Developer/pi_radar"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "NO"
       debugXPCServices = "NO"

@@ -1,12 +1,12 @@
 # Piradar
-# Main.py
+# main.py
 
 """
 Basic lookup interface for now - delete later
 Better to test functions through the lookup module.
 """
 
-import lookup
+from backend import lookup
 import server
 
 def printdict(dictionary):
@@ -20,7 +20,7 @@ def printdict(dictionary):
     else:
         print(None)
 
-server.run()
+server.start()
 
 menu = input("Search for a airline, a route, an aircraft or an airport? [l/r/c/p] ")
 if menu == "l":
