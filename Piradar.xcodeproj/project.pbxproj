@@ -9,32 +9,28 @@
 /* Begin PBXFileReference section */
 		3111AEEA2BA78BAA005930AA /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; lineEnding = 0; path = README.md; sourceTree = "<group>"; };
 		316587CB2BA8F2D6002DA2C7 /* global.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; lineEnding = 0; path = global.css; sourceTree = "<group>"; };
-		316587CC2BA8F2D6002DA2C7 /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; lineEnding = 0; path = index.html; sourceTree = "<group>"; };
+		316587CC2BA8F2D6002DA2C7 /* map.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; lineEnding = 0; path = map.html; sourceTree = "<group>"; };
 		316587CD2BA8F2D6002DA2C7 /* map.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; lineEnding = 0; path = map.js; sourceTree = "<group>"; };
+		31774DDB2BAB480700EDFAF3 /* server.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = server.py; sourceTree = "<group>"; };
+		31774DDC2BAB50C300EDFAF3 /* requirements.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = requirements.txt; sourceTree = "<group>"; };
 		317B09E42BA762D0006803B3 /* main.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; lineEnding = 0; path = main.py; sourceTree = "<group>"; };
 		317B09E82BA762D1006803B3 /* lookup.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; lineEnding = 0; path = lookup.py; sourceTree = "<group>"; };
 		317B09E92BA762D1006803B3 /* jetphotos.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; lineEnding = 0; path = jetphotos.py; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
-		316587CE2BA8F2D6002DA2C7 /* www */ = {
-			isa = PBXGroup;
-			children = (
-				316587CC2BA8F2D6002DA2C7 /* index.html */,
-				316587CB2BA8F2D6002DA2C7 /* global.css */,
-				316587CD2BA8F2D6002DA2C7 /* map.js */,
-			);
-			path = www;
-			sourceTree = "<group>";
-		};
 		31E2D1F92BA761F30016A974 = {
 			isa = PBXGroup;
 			children = (
 				3111AEEA2BA78BAA005930AA /* README.md */,
+				31774DDC2BAB50C300EDFAF3 /* requirements.txt */,
 				317B09E42BA762D0006803B3 /* main.py */,
 				317B09E82BA762D1006803B3 /* lookup.py */,
+				31774DDB2BAB480700EDFAF3 /* server.py */,
+				316587CD2BA8F2D6002DA2C7 /* map.js */,
+				316587CC2BA8F2D6002DA2C7 /* map.html */,
+				316587CB2BA8F2D6002DA2C7 /* global.css */,
 				317B09E92BA762D1006803B3 /* jetphotos.py */,
-				316587CE2BA8F2D6002DA2C7 /* www */,
 			);
 			sourceTree = "<group>";
 		};

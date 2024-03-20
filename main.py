@@ -7,6 +7,7 @@ Better to test functions through the lookup module.
 """
 
 import lookup
+import server
 
 def printdict(dictionary):
     """
@@ -18,6 +19,8 @@ def printdict(dictionary):
             print(f"{header}: {value}")
     else:
         print(None)
+
+server.run()
 
 menu = input("Search for a airline, a route, an aircraft or an airport? [l/r/c/p] ")
 if menu == "l":
