@@ -22,8 +22,8 @@ from csv import reader
 import requests
 from bs4 import BeautifulSoup
 
-_DATABASE = "../instance/main.db"
-_ROUTES_DATABASE = "../instance/routes.db"
+_DATABASE = "./instance/main.db"
+_ROUTES_DATABASE = "./instance/routes.db"
 _AIRCRAFT_URL = "https://opensky-network.org/datasets/metadata/aircraftDatabase.csv"
 _AIRPORTS_URL = "https://davidmegginson.github.io/ourairports-data/airports.csv"
 _AIRLINE_CODES_WIKI_URL = "https://en.wikipedia.org/wiki/List_of_airline_codes"
@@ -156,6 +156,10 @@ def _get_row(table, search_column, query):
 
     if result:
         result = dict(result)
+        for key, value in result.copy().items():
+            if not value:
+                del result[key]
+
     return result
 
 # MARK: - Main functions
@@ -164,7 +168,7 @@ def _get_row(table, search_column, query):
 def update(table):
     """
     Update a table in the database.
-    Takes a table name as a string - can be "all".
+    Takes a table name as a string.
     
     Updating the routes table just creates it if it doesn't exist.
     Use add_routes("/path/to/csv") to add routes.
@@ -215,7 +219,7 @@ def update(table):
             "Elevation",
             "Continent",
             "Country",
-            "Reigon",
+            "Region",
             "Municipality",
             "Scheduled service",
             "ICAO code",
@@ -280,7 +284,7 @@ def airline(callsign):
     """
     Look up an aircraft.
     Takes an airline's ICAO code as a string.
-    Returns airline info as a dictionary with keys as defined in _get_wiki_table().
+    Returns airline info as a dictionary with keys as defined in _get_airlines_table().
     """
 
     code = callsign.upper()[:3]
@@ -296,15 +300,23 @@ def aircraft(address):
     address = address.lower()
     return _get_row("Aircraft", "ICAO24 address",address)
 
-def airport(iata):
+def airport(code):
     """
     Look up an airport.
-    Takes the airport's 3-digit IATA code as a string.
+    Takes the airport's IATA or ICAO code as a string.
     Returns airport info as a dictionary with keys as defined in update().
     """
-
-    iata = iata.upper()
-    return _get_row("Airports", "IATA code",iata)
+    
+    code = code.upper()
+    if len(code) == 3:
+        code = code.upper()
+        return _get_row("Airports", "IATA code",code)
+    elif len(code) == 4:
+        code = code.upper()
+        return _get_row("Airports", "ICAO code",code)
+    else:
+        return None
+    
 
 def route(callsign):
     """

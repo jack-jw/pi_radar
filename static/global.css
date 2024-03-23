@@ -48,14 +48,6 @@
     transition: color 0.1s ease;
 }
 
-.aircraft-icon:hover {
-    color: lightgrey;
-}
-
-.aircraft-icon:active {
-    color: grey;
-}
-
 .helicopter-icon {
     animation: helicopter-spin 0.5s linear infinite
 }

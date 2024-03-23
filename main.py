@@ -1,8 +1,8 @@
 # Piradar
-# server.py
+# main.py
 
 """
-Control the HTTP server
+For now just starts the HTTP server
 
 Functions:
     start()
@@ -11,36 +11,56 @@ Functions:
 from os import urandom
 from threading import Thread
 from flask import Flask, render_template
-from flask_socketio import SocketIO#, emit
+from flask_socketio import SocketIO, emit
 import backend
 
 def start():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = urandom(24)
+    app.config["SECRET_KEY"] = urandom(24)
     socketio = SocketIO(app)
 
-    @app.route('/')
+    @app.route("/")
     def index():
-        return render_template('index.html')
+        return render_template("map.html")
 
-    @app.route('/map')
+    @app.route("/map")
     def map():
-        return render_template('map.html')
+        return render_template("map.html")
 
-    @socketio.on('connect')
+    @socketio.on("connect")
     def handle_connect():
-        print('Client connected')
+        emit("decoder.get", backend.decoder.get())
 
-    @socketio.on('info')
+    @socketio.on("lookup.airline")
+    def handle_aircraft_info_query(callsign):
+        emit("lookup.airline", backend.lookup.airline(callsign))
+
+    @socketio.on("lookup.aircraft")
     def handle_aircraft_info_query(address):
-        emit('info', backend.lookup.aircraft(address))
+        emit("lookup.aircraft", backend.lookup.aircraft(address))
 
-    @socketio.on('disconnect')
+    @socketio.on("lookup.airport")
+    def handle_aircraft_info_query(code):
+        emit("lookup.airport", backend.lookup.airport(code))
+
+    @socketio.on("lookup.route")
+    def handle_aircraft_info_query(callsign):
+        emit("lookup.route", backend.lookup.route(callsign))
+        
+    @socketio.on("lookup.all")
+    def handle_all_info_query(aircraft_address, callsign):
+        info = {}
+        info["airline"] = backend.lookup.airline(callsign)
+        info["aircraft"] = backend.lookup.aircraft(aircraft_address)
+        info["origin"] = backend.lookup.airport(backend.lookup.route(callsign)["Origin"])
+        info["destination"] = backend.lookup.airport(backend.lookup.route(callsign)["Destination"])
+        emit("lookup.all", info)
+
+    @socketio.on("disconnect")
     def handle_disconnect():
-        print('Client disconnected')
+        print("Client disconnected")
 
-    socket_thread = Thread(target=socketio.run, args=(app, 'localhost', 5001))
-    #socket_thread.daemon = True
+    socket_thread = Thread(target=socketio.run, args=(app, "localhost", 5001))
     socket_thread.start()
 
 if __name__ == "__main__":

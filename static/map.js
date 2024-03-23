@@ -5,7 +5,8 @@ document.addEventListener("DOMContentLoaded", function() {
     // Socket definition
     const socket = io();
 
-    // MARK: Container scrolling
+    // MARK: - Container
+    
     const container = document.querySelector(".main-container");
     
     let startY;
@@ -73,7 +74,6 @@ document.addEventListener("DOMContentLoaded", function() {
         setRadius()
     }
     
-    
     function touchEndResize(e) {
         startY = null;
         startHeight = null;
@@ -112,7 +112,32 @@ document.addEventListener("DOMContentLoaded", function() {
         setRadius()
     }
     
+    function displayInfo(selection) {
+        clearMap()
+        socket.emit("lookup.all", selection["icao24"], selection["callsign"]);
+    }
+    
+    socket.on('lookup.all', function(info) {
+        console.log(info);
+        selection = aircraft[info["aircraft"]["ICAO24 address"]];
+        selection["marker"].getElement().style.color = "lightgrey";
+        
+        plotRoute([selection['lat'], selection['lng']],[info["origin"]["Latitude"], info["origin"]["Longitude"]])
+        plotRoute([selection['lat'], selection['lng']],[info["destination"]["Latitude"], info["destination"]["Longitude"]])
+    });
+    
     // MARK: - Map
+    
+    function clearMap() {
+        map.eachLayer(function(layer) {
+            if (layer instanceof L.Polyline) { map.removeLayer(layer) }
+        });
+        
+        Object.keys(aircraft).forEach(function(key) {
+            const marker = aircraft[key]['marker'];
+            marker.getElement().style.color = ''; // Remove the color style
+        });
+    }
     
     function setHeading(aircraft, heading) {
         const marker = aircraft['marker']
@@ -146,6 +171,43 @@ document.addEventListener("DOMContentLoaded", function() {
         }, stepDuration);
     }
     
+    function plotRoute(startPoint, endPoint, numPoints = 100) {
+        function computeIntermediatePoint(start, end, ratio) {
+            const lat1 = start.lat * Math.PI / 180;
+            const lon1 = start.lng * Math.PI / 180;
+            const lat2 = end.lat * Math.PI / 180;
+            const lon2 = end.lng * Math.PI / 180;
+            
+            const d = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin((lat1 - lat2) / 2), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lon1 - lon2) / 2), 2)));
+            
+            const A = Math.sin((1 - ratio) * d) / Math.sin(d);
+            const B = Math.sin(ratio * d) / Math.sin(d);
+            
+            const x = A * Math.cos(lat1) * Math.cos(lon1) + B * Math.cos(lat2) * Math.cos(lon2);
+            const y = A * Math.cos(lat1) * Math.sin(lon1) + B * Math.cos(lat2) * Math.sin(lon2);
+            const z = A * Math.sin(lat1) + B * Math.sin(lat2);
+            
+            const lat = Math.atan2(z, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))) * 180 / Math.PI;
+            const lon = Math.atan2(y, x) * 180 / Math.PI;
+            
+            return [lat, lon];
+        }
+        
+        let startLatLng = L.latLng(startPoint);
+        let endLatLng = L.latLng(endPoint);
+        
+        let distance = startLatLng.distanceTo(endLatLng);
+        
+        let curvePoints = [];
+        for (let i = 0; i <= numPoints; i++) {
+            let ratio = i / numPoints;
+            let intermediatePoint = computeIntermediatePoint(startLatLng, endLatLng, ratio);
+            curvePoints.push(intermediatePoint);
+        }
+        
+        L.polyline(curvePoints, { color: '#FF9500', weight: 2 }).addTo(map);
+    }
+    
     function setTheme(themeName) {
         let tileLayerURL;
         if (themeName === 'default') {
@@ -162,97 +224,60 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     const map = L.map('map', {
-    maxZoom: 15,
-    zoomControl: false,
-    attributionControl: false,
+        maxZoom: 15,
+        zoomControl: false,
+        attributionControl: false,
     }).setView([51.505, -0.09], 11);
     
     const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
     
-    const plane = L.divIcon({
-    className: 'aircraft-icon',
-    html: '<div>&#x2708;</div>',
-    iconSize: [32, 32]
+    map.on('click', clearMap)
+    
+    // Define icons
+    let icons = {};
+    
+    icons["plane"] = L.divIcon({
+        className: 'aircraft-icon',
+        html: '<div>&#x2708;</div>',
+        iconSize: [32, 32]
     });
     
-    const helicopter = L.divIcon({
-    className: 'aircraft-icon',
-    html: '<div class="helicopter-icon">&#xFF0B;</div>',
-    iconSize: [32, 32]
+    icons["helicopter"] = L.divIcon({
+        className: 'aircraft-icon',
+        html: '<div class="helicopter-icon">&#xFF0B;</div>',
+        iconSize: [32, 32]
     });
     
-    const other = L.divIcon({
-    className: 'aircraft-icon',
-    html: '<div>&#x27A4;</div>',
-    iconSize: [32, 32]
+    icons["other"] = L.divIcon({
+        className: 'aircraft-icon',
+        html: '<div>&#x27A4;</div>',
+        iconSize: [32, 32]
     });
     
     // MARK: Aircraft
     let aircraft = {};
     
-    // Add demos
-    aircraft['aeroplane1'] = {
-        'lat': 51.5,
-        'lng': -0.3,
-        'heading': 70,
-        'altitude': 2000,
-        'xspeed': 300,
-        'yspeed': 10,
-        'icon': plane,
-        'icao24': 'aeroplane1',
-        'callsign': 'BAW15'
-    };
-    
-    aircraft['aeroplane2'] = {
-        'lat': 51.4,
-        'lng': -0.2,
-        'heading': 350,
-        'altitude': 1500,
-        'xspeed': 200,
-        'yspeed': -10,
-        'icon': plane,
-        'icao24': 'aeroplane2',
-        'callsign': 'QFA2'
-    };
-    
-    aircraft['helicopter'] = {
-        'lat': 51.6,
-        'lng': -0.1,
-        'heading': 90,
-        'altitude': 500,
-        'xspeed': 30,
-        'yspeed': 5,
-        'icon': helicopter,
-        'icao24': 'helicopter',
-    };
-    
-    aircraft['ufo'] = {
-        'lat': 51.55,
-        'lng': 0,
-        'heading': 30,
-        'icon': other,
-        'icao24': 'ufo',
-    };
-    // End demos
-    
-    // Load actual planes
-    //socket.on('aircraft', function(payload) {
-    //    aircraft = {
-    //        ...aircraft
-    //        ...payload
-    //    }
-    //});
-    
-    
-    // Add aircraft to map
-    for (let key in aircraft) {
-        const each = aircraft[key];
-        
-        each['marker'] = L.marker([each['lat'], each['lng']], {
-        icon: each['icon'],
-        id: each['icao24']
-        }).addTo(map);
-        
-        if (each['icon'] !== helicopter) { setHeading(each, each['heading']) }
-    }
+    socket.on('decoder.get', function(payload) {
+        aircraft = {
+            ...aircraft,
+            ...payload
+        }
+
+        // Add aircraft to map
+        for (let key in aircraft) {
+            const individual = aircraft[key];
+            
+            individual['marker'] = L.marker([individual['lat'], individual['lng']], {
+                icon: icons[individual['icon']],
+                id: individual['icao24']
+            }).addTo(map);
+            
+            individual['marker'].on('click', function() {
+                displayInfo(individual);
+            });
+            
+            if (individual['icon'] !== "helicopter") { setHeading(individual, individual['heading']) }
+        }
+    });
+
 });
