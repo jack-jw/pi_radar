@@ -4,15 +4,20 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // Socket definition
     const socket = io();
+    
+//    socket.on('disconnect', function() {
+//        alert('Connection to the server has been lost.');
+//        window.location.href = 'about:blank';
+//    });
 
     // MARK: - Container
     
-    const container = document.querySelector(".main-container");
+    const container = document.getElementById("main-container");
     
     let startY;
     let startHeight;
     let momentum;
-    let maxHeight = 60;
+    let maxHeight;
     const minHeight = 80;
     const elements = container.children;
     
@@ -22,19 +27,21 @@ document.addEventListener("DOMContentLoaded", function() {
     container.addEventListener("touchend", touchEndResize, false);
     
     function setMaxHeight() {
-        if (window.innerWidth > 500) {
-            for (let i = 0; i < elements.length; i++) {
-                maxHeight += elements[i].offsetHeight;
-            }
-            
-            if (maxHeight < window.innerHeight) {
+        maxHeight = 60
+        for (let i = 0; i < elements.length; i++) {
+            maxHeight += elements[i].offsetHeight;
+        }
+        
+        if (maxHeight < window.innerHeight) {
+            if (window.innerWidth > 500) {
                 maxHeight = window.innerHeight - 10;
+            } else {
+                maxHeight = window.innerHeight;
             }
-            
-        } else {
-            maxHeight = window.innerHeight;
         }
     }
+    
+    setMaxHeight()
     
     function setRadius() {
         if (container.clientHeight == window.innerHeight) {
@@ -46,7 +53,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     function touchStartResize(e) {
-        setMaxHeight()
         startY = e.touches[0].clientY;
         startHeight = container.clientHeight;
         momentum = 0;
@@ -98,7 +104,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     function resize(e) {
-        setMaxHeight()
         let delta = e.deltaY;
         let newHeight = container.clientHeight + delta;
         if (newHeight >= minHeight && newHeight <= maxHeight) {
@@ -121,9 +126,9 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log(info);
         selection = aircraft[info["aircraft"]["ICAO24 address"]];
         selection["marker"].getElement().style.color = "lightgrey";
-        
-        plotRoute([selection['lat'], selection['lng']],[info["origin"]["Latitude"], info["origin"]["Longitude"]])
-        plotRoute([selection['lat'], selection['lng']],[info["destination"]["Latitude"], info["destination"]["Longitude"]])
+
+        try {plotRoute([selection['lat'], selection['lng']],[info["origin"]["Latitude"], info["origin"]["Longitude"]])}
+        try {plotRoute([selection['lat'], selection['lng']],[info["destination"]["Latitude"], info["destination"]["Longitude"]])}
     });
     
     // MARK: - Map
@@ -193,15 +198,15 @@ document.addEventListener("DOMContentLoaded", function() {
             return [lat, lon];
         }
         
-        let startLatLng = L.latLng(startPoint);
-        let endLatLng = L.latLng(endPoint);
+        const startLatLng = L.latLng(startPoint);
+        const endLatLng = L.latLng(endPoint);
         
-        let distance = startLatLng.distanceTo(endLatLng);
+        const distance = startLatLng.distanceTo(endLatLng);
         
         let curvePoints = [];
         for (let i = 0; i <= numPoints; i++) {
-            let ratio = i / numPoints;
-            let intermediatePoint = computeIntermediatePoint(startLatLng, endLatLng, ratio);
+            const ratio = i / numPoints;
+            const intermediatePoint = computeIntermediatePoint(startLatLng, endLatLng, ratio);
             curvePoints.push(intermediatePoint);
         }
         
@@ -258,25 +263,48 @@ document.addEventListener("DOMContentLoaded", function() {
     let aircraft = {};
     
     socket.on('decoder.get', function(payload) {
+        oldAircraft = { ...aircraft };
         aircraft = {
             ...aircraft,
             ...payload
-        }
+        };
 
-        // Add aircraft to map
-        for (let key in aircraft) {
+        // Add aircraft
+        for (const key in aircraft) {
             const individual = aircraft[key];
             
-            individual['marker'] = L.marker([individual['lat'], individual['lng']], {
-                icon: icons[individual['icon']],
-                id: individual['icao24']
-            }).addTo(map);
+            // Add to map
             
-            individual['marker'].on('click', function() {
-                displayInfo(individual);
-            });
+            if (typeof oldAircraft[key] === 'undefined') {
+                individual['marker'] = L.marker([individual['lat'], individual['lng']], {
+                    icon: icons[individual['icon']],
+                }).addTo(map);
+
+                individual['marker'].getElement().classList.add(`_${individual['icao24']}`);
+                
+            } else {
+                setCoordinates(individual, [individual['lat'], individual['lng']])
+            }
             
             if (individual['icon'] !== "helicopter") { setHeading(individual, individual['heading']) }
+            
+            // Add to list
+            let parent = document.getElementById('aircraft-list');
+            
+            let listItem = document.createElement('div');
+            listItem.setAttribute('class', `aircraft-list _${individual['icao24']}`);
+            
+            if (typeof individual['callsign'] === 'undefined')
+            listItem.textContent = individual['callsign'];
+            parent.appendChild(listItem);
+            setMaxHeight();
+            
+            const infoTriggers = document.querySelectorAll(`._${individual['icao24']}`);
+            infoTriggers.forEach(element => {
+                element.addEventListener('click', () => {
+                    displayInfo(individual)
+                });
+            });
         }
     });
 

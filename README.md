@@ -1,4 +1,3 @@
-## Piradar
 very much a work in progress is not functional yet at all!!
 
 Hopefully eventually an ADSB decoder and web flight tracking interface aimed at the raspberry pi

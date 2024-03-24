@@ -52,15 +52,21 @@ def start():
         info = {}
         info["airline"] = backend.lookup.airline(callsign)
         info["aircraft"] = backend.lookup.aircraft(aircraft_address)
-        info["origin"] = backend.lookup.airport(backend.lookup.route(callsign)["Origin"])
-        info["destination"] = backend.lookup.airport(backend.lookup.route(callsign)["Destination"])
+        
+        route = backend.lookup.route(callsign)
+
+        if route:
+            info["origin"] = backend.lookup.airport(route["Origin"])
+            info["destination"] = backend.lookup.airport(route["Destination"])
+        else:
+            route["origin"] = route[""]
         emit("lookup.all", info)
 
     @socketio.on("disconnect")
     def handle_disconnect():
         print("Client disconnected")
 
-    socket_thread = Thread(target=socketio.run, args=(app, "localhost", 5001))
+    socket_thread = Thread(target=socketio.run, args=(app, "0.0.0.0", 5001))
     socket_thread.start()
 
 if __name__ == "__main__":

@@ -9,9 +9,9 @@ Returns some demo aircraft for testing for now
 def get():
     aircraft = {
         "40779a": {
-            "lat": 51.5,
-            "lng": -0.3,
-            "heading": 70,
+            "lat": 51.4,
+            "lng": -0.2,
+            "heading": 350,
             "altitude": 2000,
             "speed": 300,
             "vspeed": 10,
@@ -21,9 +21,9 @@ def get():
         },
 
         "7c4928": {
-            "lat": 51.4,
-            "lng": -0.2,
-            "heading": 350,
+            "lat": 51.5,
+            "lng": -0.3,
+            "heading": 70,
             "altitude": 1500,
             "speed": 200,
             "vspeed": -10,

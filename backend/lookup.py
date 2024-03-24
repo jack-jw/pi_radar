@@ -284,11 +284,19 @@ def airline(callsign):
     """
     Look up an aircraft.
     Takes an airline's ICAO code as a string.
+    Will automatically slice a callsign.
     Returns airline info as a dictionary with keys as defined in _get_airlines_table().
     """
 
+    if not callsign:
+        return None
+
     code = callsign.upper()[:3]
-    return _get_row("Airlines", "ICAO code",code)
+    result = _get_row("Airlines", "ICAO code",code)
+    if result:
+        return result
+    else:
+        return {"ICAO code": code}
 
 def aircraft(address):
     """
@@ -297,8 +305,15 @@ def aircraft(address):
     Returns aircraft info as a dictionary with keys as defined in update().
     """
 
+    if not address:
+        return None
+
     address = address.lower()
-    return _get_row("Aircraft", "ICAO24 address",address)
+    result = _get_row("Aircraft", "ICAO24 address",address)
+    if result:
+        return result
+    else:
+        return {"ICAO24 address": address}
 
 def airport(code):
     """
@@ -307,6 +322,9 @@ def airport(code):
     Returns airport info as a dictionary with keys as defined in update().
     """
     
+    if not code:
+        return None
+
     code = code.upper()
     if len(code) == 3:
         code = code.upper()
@@ -325,5 +343,12 @@ def route(callsign):
     Returns the route as a dictionary with keys Callsign, Origin, and Destination.
     """
 
+    if not callsign:
+        return None
+
     callsign = callsign.upper()
-    return _get_row("Routes", "Callsign",callsign)
+    result = _get_row("Routes", "Callsign",callsign)
+    if result:
+        return result
+    else:
+        return {"Callsign": code}
