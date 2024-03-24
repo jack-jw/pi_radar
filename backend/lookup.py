@@ -2,7 +2,7 @@
 # lookup.py
 
 """
-Manage and look up aircraft/airports/airlines/routes using the local database.
+Manage and look up aircraft/airports/airlines/routes using the local databases.
 
 Functions:
     Database management
