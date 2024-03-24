@@ -126,9 +126,16 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log(info);
         selection = aircraft[info["aircraft"]["ICAO24 address"]];
         selection["marker"].getElement().style.color = "lightgrey";
+        
+        if (!map.getBounds().contains(selection["marker"].getLatLng())) {
+            map.setView(selection["marker"].getLatLng(), map.getZoom());
+        }
+        
+        try {
+            plotRoute([selection['lat'], selection['lng']],[info["origin"]["Latitude"], info["origin"]["Longitude"]])
+            plotRoute([selection['lat'], selection['lng']],[info["destination"]["Latitude"], info["destination"]["Longitude"]])
+        } catch {}
 
-        try {plotRoute([selection['lat'], selection['lng']],[info["origin"]["Latitude"], info["origin"]["Longitude"]])}
-        try {plotRoute([selection['lat'], selection['lng']],[info["destination"]["Latitude"], info["destination"]["Longitude"]])}
     });
     
     // MARK: - Map
@@ -140,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function() {
         
         Object.keys(aircraft).forEach(function(key) {
             const marker = aircraft[key]['marker'];
-            marker.getElement().style.color = ''; // Remove the color style
+            marker.getElement().style.color = '';
         });
     }
     
@@ -289,13 +296,15 @@ document.addEventListener("DOMContentLoaded", function() {
             if (individual['icon'] !== "helicopter") { setHeading(individual, individual['heading']) }
             
             // Add to list
+            
+            if (typeof individual['callsign'] === 'undefined') {}
+            
             let parent = document.getElementById('aircraft-list');
             
             let listItem = document.createElement('div');
             listItem.setAttribute('class', `aircraft-list _${individual['icao24']}`);
+            listItem.innerHTML = `<h3>${individual['callsign']}</h3><p>${individual['speed']} KTS, ${individual['altitude']} FT, ${individual['heading']}º</p><p style="transform: rotate(${individual['heading']}deg); width: 10px;">&uarr;</p>`;
             
-            if (typeof individual['callsign'] === 'undefined')
-            listItem.textContent = individual['callsign'];
             parent.appendChild(listItem);
             setMaxHeight();
             

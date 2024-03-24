@@ -22,8 +22,8 @@ from csv import reader
 import requests
 from bs4 import BeautifulSoup
 
-_DATABASE = "./instance/main.db"
-_ROUTES_DATABASE = "./instance/routes.db"
+_DATABASE = "./instance/local.db"
+_INSTANCE_DATABASE = "./instance/instance.db"
 _AIRCRAFT_URL = "https://opensky-network.org/datasets/metadata/aircraftDatabase.csv"
 _AIRPORTS_URL = "https://davidmegginson.github.io/ourairports-data/airports.csv"
 _AIRLINE_CODES_WIKI_URL = "https://en.wikipedia.org/wiki/List_of_airline_codes"
@@ -137,7 +137,7 @@ def _get_row(table, search_column, query):
     """
 
     logging.debug("Connecting to the database")
-    db_path = _ROUTES_DATABASE if table == "Routes" else _DATABASE
+    db_path = _INSTANCE_DATABASE if table == "Routes" else _DATABASE
     db = sqlite3.connect(db_path)
     db.row_factory = sqlite3.Row
     cursor = db.cursor()
@@ -236,16 +236,16 @@ def update(table):
         _get_airlines_table()
 
     elif table == "routes":
-        routes_db = sqlite3.connect(_ROUTES_DATABASE)
-        cursor = routes_db.cursor()
+        instance_db = sqlite3.connect(_INSTANCE_DATABASE)
+        cursor = instance_db.cursor()
 
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name = 'Routes'")
         if cursor.fetchone() is None:
             cursor.execute("CREATE TABLE Routes (Callsign TEXT, Origin TEXT, Destination TEXT)")
 
         cursor.close()
-        routes_db.commit()
-        routes_db.close()
+        instance_db.commit()
+        instance_db.close()
 
     elif table == "all":
         for table_name in ("aircraft", "airports", "airlines", "routes"):
@@ -263,8 +263,8 @@ def add_routes(csv):
     with open(csv, "r", newline="", encoding="utf-8") as csv_file:
         csv_reader = reader(csv_file)
 
-        routes_db = sqlite3.sqlite3.connect(_ROUTES_DATABASE)
-        cursor = routes_db.cursor()
+        instance_db = sqlite3.sqlite3.connect(_INSTANCE_DATABASE)
+        cursor = instance_db.cursor()
 
         next(csv_reader)
 
@@ -275,9 +275,9 @@ def add_routes(csv):
                            "Destination) "
                            "VALUES (?, ?, ?)", row)
 
-        routes_db.commit()
+        instance_db.commit()
     cursor.close()
-    routes_db.close()
+    instance_db.close()
 
 # MARK: Lookup
 def airline(callsign):

@@ -8,7 +8,6 @@
 
 /* Begin PBXFileReference section */
 		3111AEEA2BA78BAA005930AA /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; lineEnding = 0; path = README.md; sourceTree = "<group>"; };
-		315096F42BAB96F300326077 /* settings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = settings.json; sourceTree = "<group>"; };
 		316587CB2BA8F2D6002DA2C7 /* global.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; lineEnding = 0; path = global.css; sourceTree = "<group>"; };
 		316587CD2BA8F2D6002DA2C7 /* map.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; lineEnding = 0; name = map.js; path = /Applications/Xcode.app/Contents/Developer/../../../../Users/jackwoodward/Developer/pi_radar/static/map.js; sourceTree = "<absolute>"; };
 		31774DDB2BAB480700EDFAF3 /* main.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = main.py; sourceTree = "<group>"; };
@@ -22,14 +21,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
-		315096F32BAB954000326077 /* instance */ = {
-			isa = PBXGroup;
-			children = (
-				315096F42BAB96F300326077 /* settings.json */,
-			);
-			path = instance;
-			sourceTree = "<group>";
-		};
 		317903412BAB6F68006E4DA8 /* templates */ = {
 			isa = PBXGroup;
 			children = (
@@ -68,7 +59,6 @@
 				317903432BAB7052006E4DA8 /* backend */,
 				317903412BAB6F68006E4DA8 /* templates */,
 				317903422BAB6FF8006E4DA8 /* static */,
-				315096F32BAB954000326077 /* instance */,
 			);
 			sourceTree = "<group>";
 		};

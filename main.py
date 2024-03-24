@@ -21,7 +21,7 @@ def start():
 
     @app.route("/")
     def index():
-        return render_template("map.html")
+        return render_template("map.html", initial="J", colour="steelblue")
 
     @app.route("/map")
     def map():
@@ -59,7 +59,8 @@ def start():
             info["origin"] = backend.lookup.airport(route["Origin"])
             info["destination"] = backend.lookup.airport(route["Destination"])
         else:
-            route["origin"] = route[""]
+            info["origin"] = info["destination"] = None
+
         emit("lookup.all", info)
 
     @socketio.on("disconnect")

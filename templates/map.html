@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
     <title>Piradar</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,8 +18,11 @@
     
     <div id="main-container">
         <div id="resize-handle"></div>
-        <h1>Aircraft</h1>
-        <div id="aircraft-list"></div>
+        <div>
+            <h1>Aircraft</h1>
+            <div id="pfp" style="background-color: {{ colour }}">{{ initial }}</div>
+            <div style="clear: left;" id="aircraft-list"></div>
+        </div>
     </div>
     
     <script src="{{ url_for('static', filename='map.js') }}"></script>
