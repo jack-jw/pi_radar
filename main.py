@@ -21,7 +21,7 @@ def start():
 
     @app.route("/")
     def index():
-        return render_template("map.html", initial="J", colour="steelblue")
+        return render_template("map.html", initial="J", colour="dodgerblue")
 
     @app.route("/map")
     def map():
@@ -52,9 +52,9 @@ def start():
         info = {}
         info["airline"] = backend.lookup.airline(callsign)
         info["aircraft"] = backend.lookup.aircraft(aircraft_address)
-        
-        route = backend.lookup.route(callsign)
+        info["callsign"] = callsign
 
+        route = backend.lookup.route(callsign)
         if route:
             info["origin"] = backend.lookup.airport(route["Origin"])
             info["destination"] = backend.lookup.airport(route["Destination"])
@@ -62,6 +62,10 @@ def start():
             info["origin"] = info["destination"] = None
 
         emit("lookup.all", info)
+
+    @socketio.on("jetphotos.thumb")
+    def handle_thumb_jetphotos_query(tail):
+        emit("jetphotos.thumb", {"url": backend.jetphotos.thumb(tail), "tail": tail})
 
     @socketio.on("disconnect")
     def handle_disconnect():

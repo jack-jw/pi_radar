@@ -17,12 +17,14 @@
     <div id="map"></div>
     
     <div id="main-container">
-        <div id="resize-handle"></div>
-        <div>
+        <div id="main-container-main-view">
+            <div class="resize-handle"></div>
             <h1>Aircraft</h1>
             <div id="pfp" style="background-color: {{ colour }}">{{ initial }}</div>
-            <div style="clear: left;" id="aircraft-list"></div>
+            <div id="aircraft-list" style="clear: left;"></div>
         </div>
+        
+        <div id="main-container-aircraft-view"></div>
     </div>
     
     <script src="{{ url_for('static', filename='map.js') }}"></script>

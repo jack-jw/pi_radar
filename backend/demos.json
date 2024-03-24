@@ -1,0 +1,68 @@
+{
+    "407798": {
+        "lat": 51.5,
+        "lng": -0.6,
+        "heading": 135,
+        "altitude": 2000,
+        "speed": 300,
+        "vspeed": 10,
+        "icon": "plane",
+        "icao24": "407798",
+        "callsign": "BAW282"
+    },
+    "7c4928": {
+        "lat": 51.4,
+        "lng": -0.3,
+        "heading": 100,
+        "altitude": 1500,
+        "speed": 200,
+        "vspeed": -10,
+        "icon": "plane",
+        "icao24": "7c4928",
+        "callsign": "QFA2"
+    },
+    "86e3ec": {
+        "lat": 51.45,
+        "lng": -0.15,
+        "heading": 320,
+        "altitude": 1500,
+        "speed": 200,
+        "vspeed": -10,
+        "icon": "plane",
+        "icao24": "86e3ec",
+        "callsign": "JAL41"
+    },
+    "3c6701": {
+        "lat": 51.6,
+        "lng": -0.15,
+        "heading": 290,
+        "altitude": 30000,
+        "speed": 380,
+        "vspeed": 0,
+        "icon": "plane",
+        "icao24": "3c6701",
+        "callsign": "DLH412"
+    },
+    "helicopter": {
+        "lat": 51.6,
+        "lng": -0.1,
+        "heading": 90,
+        "altitude": 250,
+        "speed": 30,
+        "vspeed": 5,
+        "icon": "helicopter",
+        "icao24": "helicopter",
+        "callsign": "POLICE"
+    },
+    "ufo": {
+        "lat": 51.55,
+        "lng": 0,
+        "heading": 30,
+        "altitude": 10000,
+        "speed": 0,
+        "vspeed": 0,
+        "icon": "other",
+        "icao24": "ufo",
+        "callsign": "ALIENS"
+    }
+}

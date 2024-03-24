@@ -117,27 +117,6 @@ document.addEventListener("DOMContentLoaded", function() {
         setRadius()
     }
     
-    function displayInfo(selection) {
-        clearMap()
-        socket.emit("lookup.all", selection["icao24"], selection["callsign"]);
-    }
-    
-    socket.on('lookup.all', function(info) {
-        console.log(info);
-        selection = aircraft[info["aircraft"]["ICAO24 address"]];
-        selection["marker"].getElement().style.color = "lightgrey";
-        
-        if (!map.getBounds().contains(selection["marker"].getLatLng())) {
-            map.setView(selection["marker"].getLatLng(), map.getZoom());
-        }
-        
-        try {
-            plotRoute([selection['lat'], selection['lng']],[info["origin"]["Latitude"], info["origin"]["Longitude"]])
-            plotRoute([selection['lat'], selection['lng']],[info["destination"]["Latitude"], info["destination"]["Longitude"]])
-        } catch {}
-
-    });
-    
     // MARK: - Map
     
     function clearMap() {
@@ -149,6 +128,11 @@ document.addEventListener("DOMContentLoaded", function() {
             const marker = aircraft[key]['marker'];
             marker.getElement().style.color = '';
         });
+        
+        document.getElementById('main-container-main-view').style.display = null;
+        document.getElementById('main-container-aircraft-view').style.display = "none";
+        document.getElementById('main-container-aircraft-view').innerHTML = null;
+        setMaxHeight();
     }
     
     function setHeading(aircraft, heading) {
@@ -183,7 +167,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }, stepDuration);
     }
     
-    function plotRoute(startPoint, endPoint, numPoints = 100) {
+    function plotRoute(startPoint, endPoint, opacity) {
         function computeIntermediatePoint(start, end, ratio) {
             const lat1 = start.lat * Math.PI / 180;
             const lon1 = start.lng * Math.PI / 180;
@@ -208,16 +192,17 @@ document.addEventListener("DOMContentLoaded", function() {
         const startLatLng = L.latLng(startPoint);
         const endLatLng = L.latLng(endPoint);
         
-        const distance = startLatLng.distanceTo(endLatLng);
-        
         let curvePoints = [];
-        for (let i = 0; i <= numPoints; i++) {
-            const ratio = i / numPoints;
+        let oldIntermediatePoint;
+        for (let i = 0; i <= 100; i++) {
+            const ratio = i / 100; // 100 above and here is point count
             const intermediatePoint = computeIntermediatePoint(startLatLng, endLatLng, ratio);
             curvePoints.push(intermediatePoint);
         }
         
-        L.polyline(curvePoints, { color: '#FF9500', weight: 2 }).addTo(map);
+        L.polyline(curvePoints, { color: '#FF9500', weight: 2, opacity: opacity }).addTo(map);
+        
+        return startLatLng.distanceTo(endLatLng);
     }
     
     function setTheme(themeName) {
@@ -303,7 +288,9 @@ document.addEventListener("DOMContentLoaded", function() {
             
             let listItem = document.createElement('div');
             listItem.setAttribute('class', `aircraft-list _${individual['icao24']}`);
-            listItem.innerHTML = `<h3>${individual['callsign']}</h3><p>${individual['speed']} KTS, ${individual['altitude']} FT, ${individual['heading']}º</p><p style="transform: rotate(${individual['heading']}deg); width: 10px;">&uarr;</p>`;
+            listItem.innerHTML = `
+                <h3>${individual['callsign']}</h3>
+                <p>${individual['speed']} KTS, ${individual['altitude']} FT, ${individual['heading']}º</p>`;
             
             parent.appendChild(listItem);
             setMaxHeight();
@@ -311,10 +298,77 @@ document.addEventListener("DOMContentLoaded", function() {
             const infoTriggers = document.querySelectorAll(`._${individual['icao24']}`);
             infoTriggers.forEach(element => {
                 element.addEventListener('click', () => {
-                    displayInfo(individual)
+                    socket.emit("lookup.all", individual["icao24"], individual["callsign"]);
                 });
             });
         }
     });
+    
+    socket.on('lookup.all', function(info) {
+        socket.emit('jetphotos.thumb',info['aircraft']['Registration'])
+        console.log(info);
+        selection = aircraft[info["aircraft"]["ICAO24 address"]];
+        selection["marker"].getElement().style.color = "lightgrey";
+        map.setView(selection["marker"].getLatLng(), map.getZoom());
+        document.getElementById('main-container-main-view').style.display = 'none';
+        aircraftView = document.getElementById('main-container-aircraft-view')
+        aircraftView.style.display = null;
+        
+        let routePercentage;
+        try {
+            const fromOrigin = plotRoute([selection['lat'], selection['lng']],[info["origin"]["Latitude"], info["origin"]["Longitude"]], 1);
+            const toDestination = plotRoute([selection['lat'], selection['lng']],[info["destination"]["Latitude"], info["destination"]["Longitude"]], 0.5);
+            routePercentage = fromOrigin / (fromOrigin + toDestination);
+            console.log(toDestination)
+        } catch {
+            routePercentage = 0;
+        }
+        
+        if (info['origin'] === null) {
+            info['origin'] = {};
+            info['origin']['IATA code'] = '???';
+            info['origin']['Municipality'] = 'Unknown';
+        }
+        
+        if (info['destination'] === null) {
+            info['destination'] = {};
+            info['destination']['IATA code'] = '???';
+            info['destination']['Municipality'] = 'Unknown';
+        }
+            
+        // Fix this mess
+        aircraftView.innerHTML = `
+            <img class="aircraft-img" id="img-${info['aircraft']['Registration']}">
+            <div class="aircraft-info">
+                
+                <div style="position: relative; top: 0; padding: 25px 0">
+                    <span style="position: absolute; left: 0;" id="back">&larr; ${info['airline']['Airline']}</span>
+                    <span style="position: absolute; right: 0;">${info['callsign']}</span>
+                </div>
+                <hr>
+                <div style="position: relative; opacity: 0.5; padding: 10px 0">
+                    <span style="position: absolute; left: 0;">${info['origin']['Municipality']}</span>
 
+                    <span style="position: absolute; right: 0;">${info['destination']['Municipality']}</span>
+                </div>
+            
+                <div style="position: relative; margin: 0; padding-bottom: 50px">
+                    <h1 style="position: absolute; left: 0;">${info['origin']['IATA code']}</h1>
+                    
+                    <h1 style="position: absolute; right: 0;">${info['destination']['IATA code']}</h1>
+                    
+                    <h1 style="position: absolute; left: 50%; transform: translateX(-50%);">&#x2708;</h1>
+                </div>
+                <progress style="width: 100%; position: relative;" value="${routePercentage}" max="1"></progress>
+            </div>
+        `;
+        setMaxHeight()
+        
+        document.getElementById('back').addEventListener('click', clearMap);
+    });
+    
+    socket.on('jetphotos.thumb', function(image) {
+        imageId = 'img-' + image['tail']
+        try {document.getElementById(imageId).src = image["url"]} catch {}
+    });
 });

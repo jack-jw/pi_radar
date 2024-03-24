@@ -24,16 +24,14 @@ def full(tail):
     response = get("https://jetphotos.com" + image_url_element["href"], timeout=60)
     soup = BeautifulSoup(response.text, "html.parser")
     image = soup.find("img", class_="large-photo__img")
-    response = get(image["srcset"], timeout=60)
-    name = tail + ".jpg"
-    with open(name, "wb") as local_image:
-        local_image.write(response.content)
+    return image["srcset"]
 
 def thumb(tail):
     """
     Get a small, thumbnail image of an aircraft
     Does not include watermark
     Takes a tail number as a string
+    Returns a URL
     """
 
     url = ("https://www.jetphotos.com/showphotos.php?keywords-type=reg&keywords="
@@ -42,7 +40,4 @@ def thumb(tail):
     response = get(url, timeout=60)
     soup = BeautifulSoup(response.text, "html.parser")
     image = soup.find("img", class_="result__photo")
-    response = get("https:" + image["src"], timeout=60)
-    name = tail + ".jpg"
-    with open(name, "wb") as local_image:
-        local_image.write(response.content)
+    return "https:" + image["src"]
