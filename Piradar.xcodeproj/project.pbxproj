@@ -13,7 +13,6 @@
 		31774DDB2BAB480700EDFAF3 /* main.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = main.py; sourceTree = "<group>"; };
 		31774DDC2BAB50C300EDFAF3 /* requirements.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = requirements.txt; sourceTree = "<group>"; };
 		317903402BAB6F68006E4DA8 /* map.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = map.html; sourceTree = "<group>"; };
-		317903452BAB7401006E4DA8 /* index.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
 		317B09E82BA762D1006803B3 /* lookup.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; lineEnding = 0; path = lookup.py; sourceTree = "<group>"; };
 		317B09E92BA762D1006803B3 /* jetphotos.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; lineEnding = 0; path = jetphotos.py; sourceTree = "<group>"; };
 		31C111EF2BAF189E00725E15 /* decoder.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = decoder.py; sourceTree = "<group>"; };
@@ -24,7 +23,6 @@
 		317903412BAB6F68006E4DA8 /* templates */ = {
 			isa = PBXGroup;
 			children = (
-				317903452BAB7401006E4DA8 /* index.html */,
 				317903402BAB6F68006E4DA8 /* map.html */,
 			);
 			path = templates;
