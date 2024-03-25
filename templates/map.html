@@ -6,7 +6,7 @@
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"></script>
     
     <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}"/>
@@ -24,7 +24,7 @@
             <div id="aircraft-list" style="clear: left;"></div>
         </div>
         
-        <div id="main-container-aircraft-view"></div>
+        <div id="main-container-aircraft-view" style="display: none;"></div>
     </div>
     
     <script src="{{ url_for('static', filename='map.js') }}"></script>

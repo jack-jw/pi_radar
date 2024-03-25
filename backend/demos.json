@@ -1,6 +1,6 @@
 {
     "407798": {
-        "lat": 51.5,
+        "lat": 51.52,
         "lng": -0.6,
         "heading": 135,
         "altitude": 2000,
@@ -43,26 +43,26 @@
         "icao24": "3c6701",
         "callsign": "DLH412"
     },
-    "helicopter": {
-        "lat": 51.6,
+    "406d4e": {
+        "lat": 51.50550,
+        "lng": 0.04664,
+        "heading": 95,
+        "altitude": 20,
+        "speed": 0,
+        "vspeed": 0,
+        "icon": "plane",
+        "icao24": "406d4e",
+        "callsign": "CFE7029"
+    },
+    "400f2a": {
+        "lat": 51.57,
         "lng": -0.1,
         "heading": 90,
         "altitude": 250,
         "speed": 30,
         "vspeed": 5,
         "icon": "helicopter",
-        "icao24": "helicopter",
+        "icao24": "400f2a",
         "callsign": "POLICE"
-    },
-    "ufo": {
-        "lat": 51.55,
-        "lng": 0,
-        "heading": 30,
-        "altitude": 10000,
-        "speed": 0,
-        "vspeed": 0,
-        "icon": "other",
-        "icao24": "ufo",
-        "callsign": "ALIENS"
     }
 }

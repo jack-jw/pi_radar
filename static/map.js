@@ -5,10 +5,10 @@ document.addEventListener("DOMContentLoaded", function() {
     // Socket definition
     const socket = io();
     
-//    socket.on('disconnect', function() {
-//        alert('Connection to the server has been lost.');
-//        window.location.href = 'about:blank';
-//    });
+    socket.on('disconnect', function() {
+        alert('Connection to the server has been lost.');
+        window.location.href = 'about:blank';
+    });
 
     // MARK: - Container
     
@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", function() {
     let momentum;
     let maxHeight;
     const minHeight = 80;
-    const elements = container.children;
     
     container.addEventListener("wheel", resize);
     container.addEventListener("touchstart", touchStartResize, false);
@@ -27,9 +26,12 @@ document.addEventListener("DOMContentLoaded", function() {
     container.addEventListener("touchend", touchEndResize, false);
     
     function setMaxHeight() {
+        const elements = container.children;
         maxHeight = 60
         for (let i = 0; i < elements.length; i++) {
-            maxHeight += elements[i].offsetHeight;
+            if (window.getComputedStyle(elements[i]).display !== 'none') {
+                maxHeight += elements[i].offsetHeight;
+            }
         }
         
         if (maxHeight < window.innerHeight) {
@@ -39,8 +41,12 @@ document.addEventListener("DOMContentLoaded", function() {
                 maxHeight = window.innerHeight;
             }
         }
+        if (window.getComputedStyle(container).height > maxHeight) {
+            container.style.height = maxHeight + "px";
+        }
     }
     
+    window.addEventListener('resize', setMaxHeight);
     setMaxHeight()
     
     function setRadius() {
@@ -53,6 +59,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     function touchStartResize(e) {
+        container.style.transition = null;
         startY = e.touches[0].clientY;
         startHeight = container.clientHeight;
         momentum = 0;
@@ -104,6 +111,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     function resize(e) {
+        container.style.transition = null;
         let delta = e.deltaY;
         let newHeight = container.clientHeight + delta;
         if (newHeight >= minHeight && newHeight <= maxHeight) {
@@ -228,7 +236,13 @@ document.addEventListener("DOMContentLoaded", function() {
     
     const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
     
-    map.on('click', clearMap)
+    map.on('click', function() {
+        clearMap()
+        if (window.innerWidth <= 500) {
+            container.style.transition = 'height 0.3s ease';
+            container.style.height = minHeight + "px";
+        }
+    });
     
     // Define icons
     let icons = {};
@@ -309,7 +323,6 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log(info);
         selection = aircraft[info["aircraft"]["ICAO24 address"]];
         selection["marker"].getElement().style.color = "lightgrey";
-        map.setView(selection["marker"].getLatLng(), map.getZoom());
         document.getElementById('main-container-main-view').style.display = 'none';
         aircraftView = document.getElementById('main-container-aircraft-view')
         aircraftView.style.display = null;
@@ -317,53 +330,81 @@ document.addEventListener("DOMContentLoaded", function() {
         let routePercentage;
         try {
             const fromOrigin = plotRoute([selection['lat'], selection['lng']],[info["origin"]["Latitude"], info["origin"]["Longitude"]], 1);
-            const toDestination = plotRoute([selection['lat'], selection['lng']],[info["destination"]["Latitude"], info["destination"]["Longitude"]], 0.5);
-            routePercentage = fromOrigin / (fromOrigin + toDestination);
-            console.log(toDestination)
+            routePercentage = fromOrigin;
         } catch {
             routePercentage = 0;
         }
         
+        try {
+            const toDestination = plotRoute([selection['lat'], selection['lng']],[info["destination"]["Latitude"], info["destination"]["Longitude"]], 0.5);
+            routePercentage = routePercentage / (routePercentage + toDestination);
+        } catch {
+            routePercentage = 0;
+        }
+        
+        // Fix this mess
         if (info['origin'] === null) {
             info['origin'] = {};
-            info['origin']['IATA code'] = '???';
-            info['origin']['Municipality'] = 'Unknown';
+            info['origin']['IATA code'] = '<input id="origin-input" class="iata-input" style="float: left" contenteditable="true" required maxlength="3" minlength="3">';
+            info['origin']['Municipality'] = 'Origin'
         }
         
         if (info['destination'] === null) {
             info['destination'] = {};
-            info['destination']['IATA code'] = '???';
-            info['destination']['Municipality'] = 'Unknown';
+            info['destination']['IATA code'] = '<input id="destination-input" class="iata-input" style="text-align: right; float: right" contenteditable="true" required maxlength="3" minlength="3">';
+            info['destination']['Municipality'] = 'Destination'
         }
-            
-        // Fix this mess
+        
+        if (info['airline'] == null) {
+            info['airline'] = {};
+            info['airline']['Airline'] = "Unknown Airline"
+        }
+        
         aircraftView.innerHTML = `
             <img class="aircraft-img" id="img-${info['aircraft']['Registration']}">
             <div class="aircraft-info">
                 
                 <div style="position: relative; top: 0; padding: 25px 0">
-                    <span style="position: absolute; left: 0;" id="back">&larr; ${info['airline']['Airline']}</span>
-                    <span style="position: absolute; right: 0;">${info['callsign']}</span>
+                    <span style="position: absolute; left: 0" id="back">&larr; ${info['airline']['Airline']}</span>
+                    <span style="position: absolute; right: 0">${info['callsign']}</span>
                 </div>
                 <hr>
                 <div style="position: relative; opacity: 0.5; padding: 10px 0">
-                    <span style="position: absolute; left: 0;">${info['origin']['Municipality']}</span>
+                    <span style="position: absolute; left: 0">${info['origin']['Municipality']}</span>
 
-                    <span style="position: absolute; right: 0;">${info['destination']['Municipality']}</span>
+                    <span style="position: absolute; right: 0">${info['destination']['Municipality']}</span>
                 </div>
-            
+                
                 <div style="position: relative; margin: 0; padding-bottom: 50px">
-                    <h1 style="position: absolute; left: 0;">${info['origin']['IATA code']}</h1>
+                    <h1 style="position: absolute; left: 0">${info['origin']['IATA code']}</h1>
                     
-                    <h1 style="position: absolute; right: 0;">${info['destination']['IATA code']}</h1>
+                    <h1 style="position: absolute; right: 0">${info['destination']['IATA code']}</h1>
                     
-                    <h1 style="position: absolute; left: 50%; transform: translateX(-50%);">&#x2708;</h1>
+                    <h1 style="position: absolute; left: 50%; transform: translateX(-50%)">&#x2708;</h1>
                 </div>
-                <progress style="width: 100%; position: relative;" value="${routePercentage}" max="1"></progress>
+                <progress style="width: 100%; position: relative" value="${routePercentage}" max="1"></progress>
             </div>
         `;
-        setMaxHeight()
         
+        
+        let latlng = selection['marker'].getLatLng();
+        let point = map.latLngToContainerPoint(latlng);
+        let xOffset = 0;
+        let yOffset = 0;
+
+        container.style.transition = 'height 0.3s ease';
+        if (window.innerWidth > 500) {
+            container.style.height = (window.innerHeight - 10) + "px";
+            xOffset = -160
+        } else {
+            container.style.height = "350px";
+            yOffset = 220
+        }
+        point.x += xOffset;
+        point.y += yOffset;
+        map.panTo(map.containerPointToLatLng(point));
+        
+        setMaxHeight()
         document.getElementById('back').addEventListener('click', clearMap);
     });
     

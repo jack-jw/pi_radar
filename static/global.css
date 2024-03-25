@@ -1,5 +1,7 @@
 :root {
-    font-family: system-ui;
+    --default-fonts: -apple-system, BlinkMacSystemFont, Inter, system-ui, sans-serif;
+    font-family: var(--default-fonts);
+    font-feature-settings: 'liga' 1, 'calt' 1;
     accent-color: dodgerblue;
     --colour: black;
     --background-colour: #F7F7F6;
@@ -15,6 +17,13 @@
         --control-colour: #686A6D;
         --hover-colour: rgba(255, 255, 255, 0.05);
         --map-filters: hue-rotate(180deg) invert(100%)
+    }
+}
+
+@supports (font-variation-settings: normal) {
+    :root {
+        --default-fonts: -apple-system, BlinkMacSystemFont, InterVariable, system-ui, sans-serif;
+        font-family: var(--default-fonts)
     }
 }
 
@@ -83,7 +92,7 @@ body {
     left: 0;
     box-shadow: 0 0 16px 0 rgba(0,0,0,0.2);
     width: 320px;
-    height: 98.5vh;
+    height: calc(100vh - 10px);
     background-color: var(--background-colour);
     color: var(--colour);
     margin: 10px 0 0 10px;
@@ -153,16 +162,42 @@ body {
     border-radius: 10px 10px 0 0;
     object-fit: cover;
     background-color: var(--hover-colour);
-    border: none !important;
-    outline: none !important;
     padding: 0 !important;
     margin: 0 !important;
+    pointer-events: none;
 }
 
 hr {
     color: var(--control-colour);
     border-width: 0.1px;
     opacity: 0.5;
+}
+
+h1, .iata-input {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.iata-input {
+    width: calc(3 * 1.5ch);
+    background-color: var(--hover-colour);
+    border-radius: 5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.1s ease-out;
+    outline: none;
+    border: none;
+    font-family: var(--default-fonts);
+    color: var(--color);
+    padding: 1px;
+}
+
+.iata-input:focus {
+    cursor: text;
+}
+
+.iata-input:valid {
+    background-color: var(--background-colour);
 }
 
 @media (max-width: 500px) {

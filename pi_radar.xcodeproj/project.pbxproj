@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXFileReference section */
@@ -65,17 +65,17 @@
 /* End PBXGroup section */
 
 /* Begin PBXLegacyTarget section */
-		31E2D1FE2BA761F30016A974 /* Piradar */ = {
+		31E2D1FE2BA761F30016A974 /* Python */ = {
 			isa = PBXLegacyTarget;
 			buildArgumentsString = "$(ACTION)";
-			buildConfigurationList = 31E2D2012BA761F30016A974 /* Build configuration list for PBXLegacyTarget "Piradar" */;
+			buildConfigurationList = 31E2D2012BA761F30016A974 /* Build configuration list for PBXLegacyTarget "Python" */;
 			buildPhases = (
 			);
 			buildToolPath = /usr/bin/python3;
 			buildWorkingDirectory = "";
 			dependencies = (
 			);
-			name = Piradar;
+			name = Python;
 			passBuildSettingsInEnvironment = 1;
 			productName = Piradar;
 		};
@@ -93,8 +93,8 @@
 					};
 				};
 			};
-			buildConfigurationList = 31E2D1FD2BA761F30016A974 /* Build configuration list for PBXProject "Piradar" */;
-			compatibilityVersion = "Xcode 14.0";
+			buildConfigurationList = 31E2D1FD2BA761F30016A974 /* Build configuration list for PBXProject "pi_radar" */;
+			compatibilityVersion = "Xcode 15.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -105,7 +105,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				31E2D1FE2BA761F30016A974 /* Piradar */,
+				31E2D1FE2BA761F30016A974 /* Python */,
 			);
 		};
 /* End PBXProject section */
@@ -252,7 +252,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		31E2D1FD2BA761F30016A974 /* Build configuration list for PBXProject "Piradar" */ = {
+		31E2D1FD2BA761F30016A974 /* Build configuration list for PBXProject "pi_radar" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				31E2D1FF2BA761F30016A974 /* Debug */,
@@ -261,7 +261,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		31E2D2012BA761F30016A974 /* Build configuration list for PBXLegacyTarget "Piradar" */ = {
+		31E2D2012BA761F30016A974 /* Build configuration list for PBXLegacyTarget "Python" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				31E2D2022BA761F30016A974 /* Debug */,

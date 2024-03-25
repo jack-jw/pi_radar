@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "31E2D1FE2BA761F30016A974"
-               BuildableName = "Piradar"
-               BlueprintName = "Piradar"
-               ReferencedContainer = "container:Piradar.xcodeproj">
+               BuildableName = "Python"
+               BlueprintName = "Python"
+               ReferencedContainer = "container:pi_radar.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -76,9 +76,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "31E2D1FE2BA761F30016A974"
-            BuildableName = "Piradar"
-            BlueprintName = "Piradar"
-            ReferencedContainer = "container:Piradar.xcodeproj">
+            BuildableName = "Python"
+            BlueprintName = "Python"
+            ReferencedContainer = "container:pi_radar.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

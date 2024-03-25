@@ -263,32 +263,51 @@ def add_routes(csv):
     with open(csv, "r", newline="", encoding="utf-8") as csv_file:
         csv_reader = reader(csv_file)
 
-        instance_db = sqlite3.sqlite3.connect(_INSTANCE_DATABASE)
+        instance_db = sqlite3.connect(_INSTANCE_DATABASE)
         cursor = instance_db.cursor()
 
         next(csv_reader)
 
         for row in csv_reader:
-            cursor.execute("INSERT INTO Routes "
-                           "(Callsign, "
+            cursor.execute("INSERT INTO Routes ("
+                           "Callsign, "
                            "Origin, "
-                           "Destination) "
-                           "VALUES (?, ?, ?)", row)
+                           "Destination"
+                           ") VALUES (?, ?, ?)", row)
 
         instance_db.commit()
     cursor.close()
     instance_db.close()
 
+def add_route(callsign, origin_icao, destination_icao):
+    """
+    Add a route to the database.
+    Takes a callsign and two ICAO codes (origin, destination) as strings
+    """
+    
+    instance_db = sqlite3.connect(_INSTANCE_DATABASE)
+    cursor = instance_db.cursor()
+    cursor.execute("INSERT INTO Routes ("
+                   "Callsign, "
+                   "Origin, "
+                   "Destination"
+                   ") VALUES (?, ?, ?)", (callsign, origin_icao, destination_icao))
+    instance_db.commit()
+    instance_db.close()
+
 # MARK: Lookup
 def airline(callsign):
     """
-    Look up an aircraft.
-    Takes an airline's ICAO code as a string.
-    Will automatically slice a callsign.
-    Returns airline info as a dictionary with keys as defined in _get_airlines_table().
+    Look up an aircraft
+    Takes an airline's ICAO code as a string
+    - will automatically slice a callsign
+    Returns airline info as a dictionary with keys as defined in _get_airlines_table()
     """
 
     if not callsign:
+        return None
+
+    if not any(char.isdigit() for char in callsign):
         return None
 
     code = callsign.upper()[:3]
