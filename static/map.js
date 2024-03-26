@@ -321,6 +321,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
     
+    let selection;
     socket.on('lookup.all', function(info) {
         socket.emit('jetphotos.thumb',info['aircraft']['Registration'])
         console.log(info);
@@ -348,13 +349,13 @@ document.addEventListener("DOMContentLoaded", function() {
         // Fix this mess
         if (info['origin'] === null) {
             info['origin'] = {};
-            info['origin']['IATA code'] = '<input id="origin-input" class="iata-input" style="float: left" contenteditable="true" required maxlength="3" minlength="3">';
+            info['origin']['IATA code'] = '';
             info['origin']['Municipality'] = 'Origin'
         }
         
         if (info['destination'] === null) {
             info['destination'] = {};
-            info['destination']['IATA code'] = '<input id="destination-input" class="iata-input" style="text-align: right; float: right" contenteditable="true" required maxlength="3" minlength="3">';
+            info['destination']['IATA code'] = '';
             info['destination']['Municipality'] = 'Destination'
         }
         
@@ -373,15 +374,15 @@ document.addEventListener("DOMContentLoaded", function() {
                 </div>
                 <hr>
                 <div style="position: relative; opacity: 0.5; padding: 10px 0">
-                    <span style="position: absolute; left: 0">${info['origin']['Municipality']}</span>
+                    <span id="origin-${info.callsign}" style="position: absolute; left: 0">${info['origin']['Municipality']}</span>
 
-                    <span style="position: absolute; right: 0">${info['destination']['Municipality']}</span>
+                    <span id="destination-${info.callsign}" style="position: absolute; right: 0">${info['destination']['Municipality']}</span>
                 </div>
                 
                 <div style="position: relative; margin: 0; padding-bottom: 50px">
-                    <h1 style="position: absolute; left: 0">${info['origin']['IATA code']}</h1>
+                    <input id="origin-input" class="iata-input" style="position: absolute; left: 0" placeholder="${info['origin']['IATA code']}" contenteditable="true" required maxlength="3" minlength="3">
                     
-                    <h1 style="position: absolute; right: 0">${info['destination']['IATA code']}</h1>
+                    <input id="destination-input" class="iata-input" style="text-align: right; position: absolute; right: 0" placeholder="${info['destination']['IATA code']}" contenteditable="true" required maxlength="3" minlength="3">
                     
                     <h1 style="position: absolute; left: 50%; transform: translateX(-50%)">&#x2708;</h1>
                 </div>
@@ -407,6 +408,29 @@ document.addEventListener("DOMContentLoaded", function() {
         point.y += yOffset;
         map.panTo(map.containerPointToLatLng(point));
         
+        try {
+            document.getElementById("origin-input").addEventListener("input", function() {
+                if (this.value.length >= parseInt(this.getAttribute("maxlength"))) {
+                    let iata = this.value;
+                    socket.emit("lookup.airport", iata, `origin-${info.callsign}`);
+                } else {
+                    document.getElementById(`origin-${info.callsign}`).innerHTML = 'Origin';
+                }
+            });
+        } catch {}
+        
+        try {
+            document.getElementById("destination-input").addEventListener("input", function() {
+                if (this.value.length >= parseInt(this.getAttribute("maxlength"))) {
+                    let iata = this.value;
+                    socket.emit("lookup.airport", iata, `destination-${info.callsign}`);
+                } else {
+                    document.getElementById(`destination-${info.callsign}`).innerHTML = 'Destination';
+                }
+            });
+        } catch {}
+        
+        
         setMaxHeight()
         document.getElementById('back').addEventListener('click', clearMap);
     });
@@ -414,5 +438,18 @@ document.addEventListener("DOMContentLoaded", function() {
     socket.on('jetphotos.thumb', function(image) {
         imageId = 'img-' + image['tail']
         try {document.getElementById(imageId).src = image["url"]} catch {}
+    });
+    
+    socket.on('lookup.airport', function(airport) {
+        if (airport.request !== null) {
+            if (typeof airport.Municipality !== 'undefined') {
+                document.getElementById(airport.request).innerHTML = airport.Municipality
+            }
+            if (airport.request.startsWith('origin-')) {
+                socket.emit("lookup.add_route", selection.callsign, airport['ICAO code'], null)
+            } else if (airport.request.startsWith('destination-')) {
+                socket.emit("lookup.add_route", selection.callsign, null, airport['ICAO code'])
+            }
+        }
     });
 });

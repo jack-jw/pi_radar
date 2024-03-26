@@ -279,19 +279,48 @@ def add_routes(csv):
     cursor.close()
     instance_db.close()
 
-def add_route(callsign, origin_icao, destination_icao):
+def add_route(callsign, origin_icao=None, destination_icao=None):
+    print(callsign, origin_icao, destination_icao)
     """
     Add a route to the database.
     Takes a callsign and two ICAO codes (origin, destination) as strings
+    Can take one ICAO code - if you're just inputting the destination pass None
     """
     
     instance_db = sqlite3.connect(_INSTANCE_DATABASE)
     cursor = instance_db.cursor()
-    cursor.execute("INSERT INTO Routes ("
-                   "Callsign, "
-                   "Origin, "
-                   "Destination"
-                   ") VALUES (?, ?, ?)", (callsign, origin_icao, destination_icao))
+    if origin_icao and destination_icao:
+        cursor.execute("DELETE FROM Routes WHERE Callsign = ?", (callsign,))
+        cursor.execute("INSERT INTO Routes ("
+                       "Callsign, "
+                       "Origin, "
+                       "Destination"
+                       ") VALUES (?, ?, ?)", (callsign, origin_icao, destination_icao))
+    else:
+        cursor.execute("SELECT * FROM Routes WHERE Callsign = ?", (callsign,))
+        row_exists = cursor.fetchone()
+        
+        if origin_icao:
+            if row_exists:
+                cursor.execute("UPDATE Routes SET Origin = ? WHERE Callsign = ?", (origin_icao, callsign))
+            else:
+                cursor.execute("INSERT INTO Routes ("
+               "Callsign, "
+               "Origin, "
+               "Destination"
+               ") VALUES (?, ?, ?)", (callsign, origin_icao, None))
+        elif destination_icao:
+            if row_exists:
+                cursor.execute("UPDATE Routes SET Destination = ? WHERE Callsign = ?", (destination_icao, callsign))
+            else:
+                cursor.execute("INSERT INTO Routes ("
+               "Callsign, "
+               "Origin, "
+               "Destination"
+               ") VALUES (?, ?, ?)", (callsign, None, destination_icao))
+                print("Added new to DB")
+        
+                       
     instance_db.commit()
     instance_db.close()
 

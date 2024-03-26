@@ -21,7 +21,7 @@ def start():
 
     @app.route("/")
     def index():
-        return render_template("map.html", initial="J", colour="dodgerblue")
+        return render_template("map.html", initial="★", colour="dodgerblue")
 
     @socketio.on("connect")
     def handle_connect():
@@ -36,8 +36,10 @@ def start():
         emit("lookup.aircraft", backend.lookup.aircraft(address))
 
     @socketio.on("lookup.airport")
-    def handle_airport_info_query(code):
-        emit("lookup.airport", backend.lookup.airport(code))
+    def handle_airport_info_query(code, request=None):
+        airport = backend.lookup.airport(code)
+        airport["request"] = request
+        emit("lookup.airport", airport)
 
     @socketio.on("lookup.route")
     def handle_route_info_query(callsign):
@@ -45,9 +47,13 @@ def start():
 
     @socketio.on("lookup.add_route")
     def handle_add_route_query(callsign, origin, destination):
-        origin_icao = backend.lookup.airport(origin)["ICAO code"]
-        destination_icao = backend.lookup.airport(destination)["ICAO code"]
-        backend.lookup.add_route(callsign, origin_icao, destination_icao)
+        print(callsign, origin, destination)
+        if origin:
+            origin_icao = backend.lookup.airport(origin)["ICAO code"]
+            backend.lookup.add_route(callsign, origin_icao)
+        if destination:
+            destination_icao = backend.lookup.airport(destination)["ICAO code"]
+            backend.lookup.add_route(callsign, None, destination_icao)
 
     @socketio.on("lookup.all")
     def handle_all_info_query(aircraft_address, callsign):
