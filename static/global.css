@@ -1,3 +1,19 @@
+@font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: block;
+    src: url('https://rsms.me/inter/font-files/InterVariable.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: Inter;
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: block;
+    src: url('https://rsms.me/inter/font-files/InterVariable-Italic.woff2') format('woff2');
+}
+
 :root {
     --default-fonts: -apple-system, BlinkMacSystemFont, Inter, system-ui, sans-serif;
     font-family: var(--default-fonts);
@@ -17,13 +33,6 @@
         --control-colour: #686A6D;
         --hover-colour: rgba(255, 255, 255, 0.05);
         --map-filters: hue-rotate(180deg) invert(100%)
-    }
-}
-
-@supports (font-variation-settings: normal) {
-    :root {
-        --default-fonts: -apple-system, BlinkMacSystemFont, InterVariable, system-ui, sans-serif;
-        font-family: var(--default-fonts)
     }
 }
 
@@ -178,8 +187,8 @@ h1, .iata-input {
     font-weight: bold;
 }
 
-.iata-input {
-    width: calc(3 * 1.5ch);
+.iata-input, .iata-input:focus {
+    width: calc(3*1.5ch);
     background-color: var(--hover-colour);
     border-radius: 5px;
     text-transform: uppercase;
@@ -190,14 +199,25 @@ h1, .iata-input {
     font-family: var(--default-fonts);
     color: var(--color);
     padding: 1px;
+    margin-top: 10px;
+}
+
+.iata-input:valid, .iata-input:placeholder-shown {
+    background-color: var(--background-colour);
+    cursor: default;
 }
 
 .iata-input:focus {
     cursor: text;
+    background-color: var(--hover-colour);
 }
 
-.iata-input:valid {
-    background-color: var(--background-colour);
+.iata-input::placeholder {
+    color: var(--color);
+}
+
+.iata-input:focus::placeholder {
+    opacity: 50%;
 }
 
 @media (max-width: 500px) {
