@@ -221,6 +221,9 @@ document.addEventListener("DOMContentLoaded", function() {
             tileLayerURL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
         } else if (themeName === 'watercolour') {
             tileLayerURL = 'https://watercolormaps.collection.cooperhewitt.org/tile/watercolor/{z}/{x}/{y}.jpg';
+        } else if (themeName === 'satellite') {
+            tileLayerURL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+            document.querySelector('.leaflet-tile-pane').style.filter = "none";
         } else {
             console.error('Invalid theme name:', themeName);
             return;
