@@ -1,4 +1,5 @@
 .DS_Store
 *.db
+*.jpeg
 UserInterfaceState.xcuserstate
 __pycache__

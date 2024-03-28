@@ -10,7 +10,7 @@ Functions:
 
 from os import urandom
 from threading import Thread
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 from flask_socketio import SocketIO, emit
 import backend
 
@@ -72,7 +72,11 @@ def start():
 
     @socketio.on("jetphotos.thumb")
     def handle_thumb_jetphotos_query(tail):
-        emit("jetphotos.thumb", {"url": backend.jetphotos.thumb(tail), "tail": tail})
+        emit("jetphotos.thumb", {"url": backend.jetphotos.thumb(tail).replace("/instance",""), "tail": tail})
+
+    @app.route("/images/<path:filename>")
+    def serve_image(filename):
+        return send_from_directory("./instance/images/", filename)
 
     @socketio.on("disconnect")
     def handle_disconnect():
