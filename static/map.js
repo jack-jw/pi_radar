@@ -229,6 +229,7 @@ document.addEventListener("DOMContentLoaded", function() {
             toDestination = plotGreatCircleRoute(selection.marker.getLatLng(), [info.destination.lat, info.destination.lng], 0.5);
         } if (info.origin.muni !== 'Origin' && info.destination.muni !== 'Destination') {
             percentage = fromOrigin.distance / (fromOrigin.distance + toDestination.distance);
+            document.getElementById('flight-progress').value = percentage;
         }
 
         polylines = {'origin': fromOrigin, 'destination': toDestination, 'percentage': percentage, 'icao24': selection.icao24};
@@ -356,8 +357,6 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('main-container-main-view').style.display = 'none';
         aircraftView = document.getElementById('main-container-aircraft-view');
         aircraftView.style.display = null;
-        
-        plotRoutes();
 
         aircraftView.innerHTML = `
             <img class="aircraft-img" id="img-${info.aircraft.reg}">
@@ -381,9 +380,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
                     <h1 style="position: absolute; left: 50%; transform: translateX(-50%)">&#x2708;</h1>
                 </div>
-                <progress style="width: 100%; position: relative" value="${polylines.percentage}" max="1"></progress>
+                <progress id="flight-progress" style="width: 100%; position: relative" max="1"></progress>
             </div>`;
 
+        plotRoutes();
         centreOnSelection();
 
         document.getElementById("origin-input").addEventListener("input", function() {
