@@ -16,7 +16,6 @@ Functions:
     route()
 """
 
-import logging
 import sqlite3
 from csv import reader
 import requests
@@ -36,87 +35,72 @@ def _get_airlines_table():
     Get the airlines table from wikipedia and add it to the database.
     """
 
-    logging.info(f"Downloading Airlines table from {_AIRLINE_CODES_WIKI_URL}")
     try:
         response = requests.get(_AIRLINE_CODES_WIKI_URL, timeout=120)
         if not response.ok:
-            logging.error(f"Download failed: {response.status_code}")
             return
     except requests.exceptions.ReadTimeout:
-        logging.error("Took too long to download")
         return
 
     soup = BeautifulSoup(response.content, "html.parser")
     table = soup.find("table", class_="wikitable")
 
-    logging.debug("Connecting to the database")
     main_db = sqlite3.connect(_DATABASE)
     cursor = main_db.cursor()
 
     try:
-        cursor.execute("DROP TABLE Airlines")
-        logging.debug("Airlines table dropped in database")
+        cursor.execute("DROP TABLE airlines")
     except sqlite3.OperationalError:
-        logging.debug("Airlines table doesn't exist in database")
+        pass
 
-    logging.debug("Creating Airlines table")
-    cursor.execute("CREATE TABLE Airlines "
-                   "('IATA code' TEXT, "
-                   "'ICAO code' TEXT, "
-                   "'Airline' TEXT, "
-                   "'Callsign' TEXT, "
-                   "'Country' TEXT)")
+    cursor.execute("CREATE TABLE airlines "
+                   "('iata' TEXT, "
+                   "'icao' TEXT, "
+                   "'name' TEXT, "
+                   "'radio' TEXT, "
+                   "'country' TEXT)")
 
     rows = table.find_all("tr")[1:]
-    logging.info("Adding data to the database")
     for row in rows:
         cols = row.find_all("td")
         data = [col.get_text(strip=True) for col in cols]
         data += [None] * (6 - len(data))
-        cursor.execute("INSERT INTO Airlines VALUES (?, ?, ?, ?, ?)", data[:5])
+        cursor.execute("INSERT INTO airlines VALUES (?, ?, ?, ?, ?)", data[:5])
 
     cursor.close()
     main_db.commit()
     main_db.close()
-    logging.info("Done")
 
 def _csv_to_db(database, url, table_name, column_names):
     """
-    Internal, use update() function to update a DB.
+    Internal, use update() function to update a DB
 
-    Get a CSV from the web and add it to the database.
-    Takes a database, a URL and a table name as a string and column names as a tuple.
+    Get a CSV from the web and add it to the database
+    Takes a database, a URL and a table name as a string and column names as a tuple
     """
 
-    logging.info(f"Downloading {table_name} table from {url}")
     try:
         response = requests.get(url, timeout=300)
         if not response.ok:
-            logging.error(f"Download failed: {response.status_code}")
             return
     except requests.exceptions.ReadTimeout:
-        logging.error("Took too long to download")
         return
 
     data = response.text.splitlines()
 
-    logging.debug("Connecting to the database")
     main_db = sqlite3.connect(database)
     cursor = main_db.cursor()
 
     try:
         cursor.execute(f"DROP TABLE {table_name}")
-        logging.debug(f"{table_name} table dropped in database")
     except sqlite3.OperationalError:
-        logging.debug(f"{table_name} doesn't exist in database")
+        pass
 
-    logging.debug(f"Creating {table_name} table")
     columns_str = ", ".join([f"'{col}' TEXT" for col in column_names])
     cursor.execute(f"CREATE TABLE {table_name} ({columns_str})")
 
     csv_reader = reader(data)
     next(csv_reader)
-    logging.info("Adding data to the database")
     for row in csv_reader:
         cursor.execute(f"INSERT INTO {table_name} "
                        f"VALUES ({', '.join(['?' for _ in range(len(column_names))])}"
@@ -125,7 +109,6 @@ def _csv_to_db(database, url, table_name, column_names):
     cursor.close()
     main_db.commit()
     main_db.close()
-    logging.info("Done")
 
 def _get_row(table, search_column, query):
     """
@@ -136,8 +119,7 @@ def _get_row(table, search_column, query):
     Returns the row as a dictionary.
     """
 
-    logging.debug("Connecting to the database")
-    db_path = _INSTANCE_DATABASE if table == "Routes" else _DATABASE
+    db_path = _INSTANCE_DATABASE if table == "routes" else _DATABASE
     db = sqlite3.connect(db_path)
     db.row_factory = sqlite3.Row
     cursor = db.cursor()
@@ -147,7 +129,6 @@ def _get_row(table, search_column, query):
             cursor.execute(f"SELECT * FROM {table} WHERE `{search_column}` = '{query}'")
             break
         except sqlite3.OperationalError:
-            logging.error(f"{table} table does not exist in database")
             update(table)
 
     result = cursor.fetchone()
@@ -159,12 +140,31 @@ def _get_row(table, search_column, query):
         for key, value in result.copy().items():
             if not value:
                 del result[key]
+    else:
+        result = {}
+        result[search_column] = query
 
     return result
 
 # MARK: - Main functions
 
 # MARK: Database management
+def check():
+    """
+    Checks the tables/DBs are there
+    If they aren't, create and update them
+    """
+    
+    main_db = sqlite3.connect(_DATABASE)
+    cursor = main_db.cursor()
+    for table in ("airlines","aircraft","airports"):
+        cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
+        if cursor.fetchone() is None:
+            update(table)
+    cursor.close()
+    main_db.close()
+    update("routes")
+
 def update(table):
     """
     Update a table in the database.
@@ -177,60 +177,60 @@ def update(table):
     table = table.lower()
     if table == "aircraft":
         aircraft_headers = (
-            "ICAO24 address",
-            "Registration",
-            "Manufacturer ICAO name",
-            "Manufacturer name",
-            "Model",
-            "Type code",
-            "Serial number",
-            "Line number",
-            "ICAO type",
-            "Operator",
-            "Operator callsign",
-            "Operator ICAO code",
-            "Operator IATA code",
-            "Owner",
-            "Test registration",
-            "Registered",
-            "Registered until",
-            "Status",
-            "Built",
-            "First flight",
-            "Seat configuration",
-            "Engines",
-            "Modes",
-            "ADSB",
-            "ACARS",
-            "Notes",
-            "Category description"
+            "icao24",
+            "reg",
+            "manicao",
+            "man",
+            "model",
+            "type",
+            "serial",
+            "linenum",
+            "typecode",
+            "operator",
+            "operatorcallsign",
+            "operatoricao",
+            "operatoriata",
+            "owner",
+            "testreg",
+            "reged",
+            "regeduntil",
+            "status",
+            "built",
+            "firstflight",
+            "seatconfig",
+            "engines",
+            "modes",
+            "adsb",
+            "acars",
+            "notes",
+            "categorydesc"
         )
 
-        _csv_to_db(_DATABASE, _AIRCRAFT_URL, "Aircraft", aircraft_headers)
+        _csv_to_db(_DATABASE, _AIRCRAFT_URL, "aircraft", aircraft_headers)
 
     elif table == "airports":
         airport_headers = (
-            "ID",
-            "Identification",
-            "Type",
-            "Name",
-            "Latitude",
-            "Longitude",
-            "Elevation",
-            "Continent",
-            "Country",
-            "Region",
-            "Municipality",
-            "Scheduled service",
-            "ICAO code",
-            "IATA code",
-            "Local code",
-            "Homepage",
-            "Wikipedia",
-            "Keywords"
+            "id",
+            "ident",
+            "type",
+            "name",
+            "lat",
+            "lng",
+            "elevation",
+            "continent",
+            "country",
+            "region",
+            "muni",
+            "airlines",
+            "icao",
+            "iata",
+            "local",
+            "website",
+            "wiki",
+            "keywords"
         )
 
-        _csv_to_db(_DATABASE, _AIRPORTS_URL, "Airports", airport_headers)
+        _csv_to_db(_DATABASE, _AIRPORTS_URL, "airports", airport_headers)
 
     elif table == "airlines":
         _get_airlines_table()
@@ -239,9 +239,9 @@ def update(table):
         instance_db = sqlite3.connect(_INSTANCE_DATABASE)
         cursor = instance_db.cursor()
 
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name = 'Routes'")
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name = 'routes'")
         if cursor.fetchone() is None:
-            cursor.execute("CREATE TABLE Routes (Callsign TEXT, Origin TEXT, Destination TEXT)")
+            cursor.execute("CREATE TABLE routes ('callsign' TEXT, 'origin' TEXT, 'destination' TEXT)")
 
         cursor.close()
         instance_db.commit()
@@ -269,59 +269,60 @@ def add_routes(csv):
         next(csv_reader)
 
         for row in csv_reader:
-            cursor.execute("INSERT INTO Routes ("
-                           "Callsign, "
-                           "Origin, "
-                           "Destination"
+            cursor.execute("INSERT INTO routes ("
+                           "callsign, "
+                           "origin, "
+                           "destination"
                            ") VALUES (?, ?, ?)", row)
 
         instance_db.commit()
     cursor.close()
     instance_db.close()
 
-def add_route(callsign, origin_icao=None, destination_icao=None):
-    print(callsign, origin_icao, destination_icao)
-    """
-    Add a route to the database.
-    Takes a callsign and two ICAO codes (origin, destination) as strings
-    Can take one ICAO code - if you're just inputting the destination pass None
-    """
-    
+def add_origin(callsign, origin):
+
+    if not (callsign and origin):
+        return
+
     instance_db = sqlite3.connect(_INSTANCE_DATABASE)
     cursor = instance_db.cursor()
-    if origin_icao and destination_icao:
-        cursor.execute("DELETE FROM Routes WHERE Callsign = ?", (callsign,))
-        cursor.execute("INSERT INTO Routes ("
-                       "Callsign, "
-                       "Origin, "
-                       "Destination"
-                       ") VALUES (?, ?, ?)", (callsign, origin_icao, destination_icao))
+    cursor.execute("SELECT * FROM routes WHERE callsign = ?", (callsign,))
+    row_exists = cursor.fetchone()
+    
+    if row_exists:
+        cursor.execute("UPDATE routes SET origin = ? WHERE callsign = ?", (origin, callsign))
     else:
-        cursor.execute("SELECT * FROM Routes WHERE Callsign = ?", (callsign,))
-        row_exists = cursor.fetchone()
-        
-        if origin_icao:
-            if row_exists:
-                cursor.execute("UPDATE Routes SET Origin = ? WHERE Callsign = ?", (origin_icao, callsign))
-            else:
-                cursor.execute("INSERT INTO Routes ("
-               "Callsign, "
-               "Origin, "
-               "Destination"
-               ") VALUES (?, ?, ?)", (callsign, origin_icao, None))
-        elif destination_icao:
-            if row_exists:
-                cursor.execute("UPDATE Routes SET Destination = ? WHERE Callsign = ?", (destination_icao, callsign))
-            else:
-                cursor.execute("INSERT INTO Routes ("
-               "Callsign, "
-               "Origin, "
-               "Destination"
-               ") VALUES (?, ?, ?)", (callsign, None, destination_icao))
-                print("Added new to DB")
-        
-                       
+        cursor.execute("INSERT INTO Routes ("
+                       "callsign, "
+                       "origin, "
+                       "destination"
+                       ") VALUES (?, ?, NULL)", (callsign, origin))
+    
     instance_db.commit()
+    cursor.close()
+    instance_db.close()
+
+def add_destination(callsign, destination):
+
+    if not (callsign and destination):
+        return
+
+    instance_db = sqlite3.connect(_INSTANCE_DATABASE)
+    cursor = instance_db.cursor()
+    cursor.execute("SELECT * FROM routes WHERE callsign = ?", (callsign,))
+    row_exists = cursor.fetchone()
+    
+    if row_exists:
+        cursor.execute("UPDATE routes SET destination = ? WHERE callsign = ?", (destination, callsign))
+    else:
+        cursor.execute("INSERT INTO Routes ("
+                       "callsign, "
+                       "origin, "
+                       "destination"
+                       ") VALUES (?, NULL, ?)", (callsign, destination))
+    
+    instance_db.commit()
+    cursor.close()
     instance_db.close()
 
 # MARK: Lookup
@@ -340,11 +341,11 @@ def airline(callsign):
         return None
 
     code = callsign.upper()[:3]
-    result = _get_row("Airlines", "ICAO code",code)
+    result = _get_row("airlines", "icao",code)
     if result:
         return result
     else:
-        return {"ICAO code": code}
+        return {"icao": code}
 
 def aircraft(address):
     """
@@ -354,14 +355,14 @@ def aircraft(address):
     """
 
     if not address:
-        return None
+        return
 
     address = address.lower()
-    result = _get_row("Aircraft", "ICAO24 address",address)
+    result = _get_row("aircraft", "icao24",address)
     if result:
         return result
     else:
-        return {"ICAO24 address": address}
+        return {"icao24": address}
 
 def airport(code):
     """
@@ -371,18 +372,15 @@ def airport(code):
     """
     
     if not code:
-        return None
+        return
 
     code = code.upper()
     if len(code) == 3:
         code = code.upper()
-        return _get_row("Airports", "IATA code",code)
+        return _get_row("airports", "iata",code)
     elif len(code) == 4:
         code = code.upper()
-        return _get_row("Airports", "ICAO code",code)
-    else:
-        return None
-    
+        return _get_row("airports", "icao",code)
 
 def route(callsign):
     """
@@ -391,12 +389,6 @@ def route(callsign):
     Returns the route as a dictionary with keys Callsign, Origin, and Destination.
     """
 
-    if not callsign:
-        return None
-
     callsign = callsign.upper()
-    result = _get_row("Routes", "Callsign",callsign)
-    if result:
-        return result
-    else:
-        return None
+    result = _get_row("routes", "callsign",callsign)
+    return result

@@ -36,24 +36,22 @@ def start():
         emit("lookup.aircraft", backend.lookup.aircraft(address))
 
     @socketio.on("lookup.airport")
-    def handle_airport_info_query(code, request=None):
+    def handle_airport_info_query(code, routing=None):
         airport = backend.lookup.airport(code)
-        airport["request"] = request
+        airport["routing"] = routing
         emit("lookup.airport", airport)
 
     @socketio.on("lookup.route")
     def handle_route_info_query(callsign):
         emit("lookup.route", backend.lookup.route(callsign))
 
-    @socketio.on("lookup.add_route")
-    def handle_add_route_query(callsign, origin, destination):
-        print(callsign, origin, destination)
-        if origin:
-            origin_icao = backend.lookup.airport(origin)["ICAO code"]
-            backend.lookup.add_route(callsign, origin_icao)
-        if destination:
-            destination_icao = backend.lookup.airport(destination)["ICAO code"]
-            backend.lookup.add_route(callsign, None, destination_icao)
+    @socketio.on("lookup.add_origin")
+    def handle_add_origin(callsign, origin):
+        backend.lookup.add_origin(callsign, origin)
+
+    @socketio.on("lookup.add_destination")
+    def handle_add_destination(callsign, destination):
+        backend.lookup.add_destination(callsign, destination)
 
     @socketio.on("lookup.all")
     def handle_all_info_query(aircraft_address, callsign):
@@ -63,9 +61,10 @@ def start():
         info["callsign"] = callsign
 
         route = backend.lookup.route(callsign)
+        # This is really messy but JS was annoying me so I had to solve it here
         if route:
-            info["origin"] = backend.lookup.airport(route["Origin"]) if "Origin" in route else None
-            info["destination"] = backend.lookup.airport(route["Destination"]) if "Destination" in route else None
+            info["origin"] = backend.lookup.airport(route["origin"]) if "origin" in route else None
+            info["destination"] = backend.lookup.airport(route["destination"]) if "destination" in route else None
         else:
             info["origin"] = info["destination"] = None
 
@@ -83,4 +82,5 @@ def start():
     socket_thread.start()
 
 if __name__ == "__main__":
+    backend.lookup.check()
     start()
