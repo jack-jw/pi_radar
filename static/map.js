@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const socket = io();
     socket.on('disconnect', function() {
-        location.reload()
+        location.reload();
     });
 
     // MARK: - Container
@@ -165,6 +165,24 @@ document.addEventListener("DOMContentLoaded", function() {
         marker.moveInterval = setInterval(fly, 10);
     }
 
+    function centreOnSelection() {
+        let latlng = selection.marker.getLatLng();
+        let point = map.latLngToContainerPoint(latlng);
+        let xOffset = yOffset = 0;
+
+        container.style.transition = 'height 0.3s ease';
+        if (window.innerWidth > 500) {
+            container.style.height = (window.innerHeight - 10) + "px";
+            xOffset = -160;
+        } else {
+            container.style.height = "350px";
+            yOffset = 175;
+        }
+        point.x += xOffset;
+        point.y += yOffset;
+        map.panTo(map.containerPointToLatLng(point));
+    }
+
     function plotGreatCircleRoute(startPoint, endPoint, opacity) {
         function computeIntermediatePoint(start, end, ratio) {
             const lat1 = start.lat * Math.PI / 180;
@@ -195,25 +213,25 @@ document.addEventListener("DOMContentLoaded", function() {
         const line = L.polyline(curvePoints, { color: '#FF9500', weight: 2, opacity: opacity }).addTo(map);
         const distance = startLatLng.distanceTo(endLatLng); // need to implement great circle distance calc
 
-        return {'line': line, 'distance': distance}
+        return {'line': line, 'distance': distance};
     }
 
     function plotRoutes() {
-        try { map.removeLayer(polylines.origin.line); } catch {}
-        try { map.removeLayer(polylines.destination.line); } catch {}
+        try { map.removeLayer(polylines.origin.line); } catch {};
+        try { map.removeLayer(polylines.destination.line); } catch {};
 
         let fromOrigin, toDestination;
         let percentage = 0;
         if (info.origin.muni !== 'Origin') {
-            fromOrigin = plotGreatCircleRoute([info.origin.lat, info.origin.lng], selection.marker.getLatLng(), 1)
+            fromOrigin = plotGreatCircleRoute([info.origin.lat, info.origin.lng], selection.marker.getLatLng(), 1);
         }
         if (info.destination.muni !== 'Destination') {
-            toDestination = plotGreatCircleRoute(selection.marker.getLatLng(), [info.destination.lat, info.destination.lng], 0.5)
+            toDestination = plotGreatCircleRoute(selection.marker.getLatLng(), [info.destination.lat, info.destination.lng], 0.5);
         } if (info.origin.muni !== 'Origin' && info.destination.muni !== 'Destination') {
-            percentage = fromOrigin.distance / (fromOrigin.distance + toDestination.distance)
+            percentage = fromOrigin.distance / (fromOrigin.distance + toDestination.distance);
         }
 
-        polylines = {'origin': fromOrigin, 'destination': toDestination, 'percentage': percentage, 'icao24': selection.icao24}
+        polylines = {'origin': fromOrigin, 'destination': toDestination, 'percentage': percentage, 'icao24': selection.icao24};
     }
     
     function setTheme(themeName) {
@@ -237,7 +255,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const map = L.map('map', {
         maxZoom: 15,
         zoomControl: false,
-        attributionControl: false,
+        attributionControl: false
     }).setView([51.505, -0.09], 11);
     
     const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
@@ -285,20 +303,18 @@ document.addEventListener("DOMContentLoaded", function() {
             const individual = aircraft[key];
 
             if (typeof oldAircraft[key] === 'undefined') {
-                individual.marker = L.marker([individual.lat, individual.lng], {
-                    icon: icons[individual.icon],
-                    className: `_${individual.id}`
-                }).addTo(map);
+                individual.marker = L.marker([individual.lat, individual.lng], { icon: icons[individual.icon] }).addTo(map);
+                individual.marker.getElement().classList.add(`_${individual.icao24}`);
             }
 
-            setAircraft(individual)
+            setAircraft(individual);
 
             let listParent = document.getElementById('aircraft-list');
             let listItem = document.createElement('div');
             listItem.setAttribute('class', `aircraft-list _${individual.icao24}`);
             listItem.innerHTML = `
                 <h3>${individual.callsign}</h3>
-                <p>${individual.callsign} KTS, ${individual.alt} FT, ${individual.hdg}º</p>`;
+                <p>${individual.speed} KTS, ${individual.alt} FT, ${individual.hdg}º</p>`;
 
             listParent.appendChild(listItem);
             setMaxContainerHeight();
@@ -318,18 +334,18 @@ document.addEventListener("DOMContentLoaded", function() {
         if (info.origin === null) {
             info.origin = {};
             info.origin.iata = '';
-            info.origin.muni = 'Origin'
+            info.origin.muni = 'Origin';
         }
 
         if (info.destination === null) {
             info.destination = {};
             info.destination.iata = '';
-            info.destination.muni = 'Destination'
+            info.destination.muni = 'Destination';
         }
 
         if (info.airline == null) {
             info.airline = {};
-            info.airline.name = "Unknown Airline"
+            info.airline.name = "Unknown Airline";
         }
 
         selection = aircraft[info.aircraft.icao24];
@@ -338,10 +354,10 @@ document.addEventListener("DOMContentLoaded", function() {
         selection.marker.getElement().style.color = "lightgrey";
 
         document.getElementById('main-container-main-view').style.display = 'none';
-        aircraftView = document.getElementById('main-container-aircraft-view')
+        aircraftView = document.getElementById('main-container-aircraft-view');
         aircraftView.style.display = null;
         
-        plotRoutes()
+        plotRoutes();
 
         aircraftView.innerHTML = `
             <img class="aircraft-img" id="img-${info.aircraft.reg}">
@@ -368,21 +384,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 <progress style="width: 100%; position: relative" value="${polylines.percentage}" max="1"></progress>
             </div>`;
 
-        let latlng = selection.marker.getLatLng();
-        let point = map.latLngToContainerPoint(latlng);
-        let xOffset = yOffset = 0;
-
-        container.style.transition = 'height 0.3s ease';
-        if (window.innerWidth > 500) {
-            container.style.height = (window.innerHeight - 10) + "px";
-            xOffset = -160
-        } else {
-            container.style.height = "350px";
-            yOffset = 175
-        }
-        point.x += xOffset;
-        point.y += yOffset;
-        map.panTo(map.containerPointToLatLng(point));
+        centreOnSelection();
 
         document.getElementById("origin-input").addEventListener("input", function() {
             if (this.value.length >= parseInt(this.getAttribute("maxlength"))) {
@@ -408,25 +410,25 @@ document.addEventListener("DOMContentLoaded", function() {
 
     socket.on('jetphotos.thumb', function(image) {
         imageId = 'img-' + image.tail
-        try {document.getElementById(imageId).src = image.url} catch {}
+        try {document.getElementById(imageId).src = image.url} catch {};
     });
 
     socket.on('lookup.airport', function(airport) {
         if (airport.routing !== null) {
             if (typeof airport.muni !== 'undefined') {
-                document.getElementById(airport.routing).innerHTML = airport.muni
+                document.getElementById(airport.routing).innerHTML = airport.muni;
             }
 
             if (airport.routing.startsWith('origin-')) {
                 if (selection.icao24 === polylines.icao24) {
-                    info.origin = airport
+                    info.origin = airport;
                 }
-                socket.emit("lookup.add_origin", selection.callsign, airport.icao)
+                socket.emit("lookup.add_origin", selection.callsign, airport.icao);
             } else if (airport.routing.startsWith('destination-')) {
                 if (selection.icao24 === polylines.icao24) {
-                    info.destination = airport
+                    info.destination = airport;
                 }
-                socket.emit("lookup.add_destination", selection.callsign, airport.icao)
+                socket.emit("lookup.add_destination", selection.callsign, airport.icao);
             }
         }
     });

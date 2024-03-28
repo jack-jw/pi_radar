@@ -61,7 +61,7 @@ def start():
         info["callsign"] = callsign
 
         route = backend.lookup.route(callsign)
-        # This is really messy but JS was annoying me so I had to solve it here
+
         if route:
             info["origin"] = backend.lookup.airport(route["origin"]) if "origin" in route else None
             info["destination"] = backend.lookup.airport(route["destination"]) if "destination" in route else None
